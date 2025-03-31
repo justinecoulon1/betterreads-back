@@ -6,7 +6,7 @@ const MAX_ACCESS_TOKEN_AGE = 60;
 
 @Injectable()
 export class TokenService {
-  private jwtSecret = process.env.TOKEN_SECRET;
+  private jwtSecret = process.env.JWT_SECRET;
 
   constructor(private readonly jwtService: JwtService) {}
 

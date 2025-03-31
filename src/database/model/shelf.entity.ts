@@ -10,23 +10,23 @@ import {
 import { User } from './user.entity';
 import { Length } from 'class-validator';
 
-enum ShelveType {
+enum ShelfType {
   'READ' = 'READ',
   'TO_READ' = 'TO_READ',
   'READING' = 'READING',
 }
 
 @Entity()
-export class Shelve {
-  @PrimaryGeneratedColumn({ name: 'shelve_id' })
+export class Shelf {
+  @PrimaryGeneratedColumn({ name: 'shelf_id' })
   id: number;
 
   @Column({ length: 100 })
   @Length(1, 100)
   name: string;
 
-  @Column({ name: 'shelve_type' })
-  type: ShelveType;
+  @Column({ name: 'shelf_type' })
+  type: ShelfType;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
@@ -38,7 +38,7 @@ export class Shelve {
   @JoinColumn({ name: 'app_user_id' })
   user: Promise<User>;
 
-  constructor(name: string, type: ShelveType, createdAt: Date, updatedAt: Date, user: User) {
+  constructor(name: string, type: ShelfType, createdAt: Date, updatedAt: Date, user: User) {
     this.name = name;
     this.type = type;
     this.createdAt = createdAt;
