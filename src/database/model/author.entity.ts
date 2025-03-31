@@ -1,5 +1,6 @@
 import { Length } from 'class-validator';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Book } from './book.entity';
 
 @Entity()
 export class Author {
@@ -15,6 +16,9 @@ export class Author {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @ManyToMany(() => Book, (book) => book.authors)
+  books: Promise<Book[]>;
 
   constructor(name: string, createdAt: Date, updatedAt: Date) {
     this.name = name;

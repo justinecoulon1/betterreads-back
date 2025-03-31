@@ -3,12 +3,14 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Length } from 'class-validator';
+import { Book } from './book.entity';
 
 enum ShelfType {
   'READ' = 'READ',
@@ -37,6 +39,9 @@ export class Shelf {
   @ManyToOne(() => User, (user) => user.shelves)
   @JoinColumn({ name: 'app_user_id' })
   user: Promise<User>;
+
+  @ManyToMany(() => Book, (book) => book.shelves)
+  books: Promise<Book[]>;
 
   constructor(name: string, type: ShelfType, createdAt: Date, updatedAt: Date, user: User) {
     this.name = name;
