@@ -8,3 +8,13 @@ export type CreateUserRequestDto = {
   name: string;
   password: string;
 };
+
+export type LoginRequestDto = {
+  email: string;
+  password: string;
+};
+
+export type LoginResponseDto = {
+  user: UserDto;
+  accessToken: string;
+};

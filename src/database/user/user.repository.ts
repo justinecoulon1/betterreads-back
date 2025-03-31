@@ -26,4 +26,8 @@ export class UserRepository {
       id,
     });
   }
+
+  findByEmail(email: string): Promise<User> {
+    return this.repository.findOneBy({ email });
+  }
 }

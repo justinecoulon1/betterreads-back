@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from '../../database/user/user.repository';
 import { User } from '../../database/model/user.entity';
 import { PasswordService } from '../utils/auth/password.service';
@@ -22,5 +22,16 @@ export class UserService {
 
   getUserById(id: number): Promise<User> {
     return this.userRepository.findById(id);
+  }
+
+  async getUser(email: string, password: string): Promise<User> {
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    if (!(await this.passwordService.verifyPassword(password, user.password))) {
+      throw new ForbiddenException('Wrong credentials');
+    }
+    return user;
   }
 }
