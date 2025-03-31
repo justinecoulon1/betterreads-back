@@ -20,4 +20,10 @@ export class UserRepository {
   save(user: User): Promise<User> {
     return this.repository.save(user);
   }
+
+  findById(id: number): Promise<User> {
+    return this.repository.findOneBy({
+      id,
+    });
+  }
 }

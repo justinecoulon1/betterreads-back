@@ -19,4 +19,8 @@ export class UserService {
     const newUser = new User(name, email, hashedPassword, new Date(), new Date());
     return this.userRepository.save(newUser);
   }
+
+  getUserById(id: number): Promise<User> {
+    return this.userRepository.findById(id);
+  }
 }

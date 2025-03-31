@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CreateUserRequestDto, UserDto } from '../dto/user.dto';
 import userMapper from '../mapper/user.mapper';
 import { UserService } from './user.service';
@@ -21,5 +21,10 @@ export class UserController {
         createUserRequestDto.password,
       ),
     );
+  }
+
+  @Get('/:id')
+  async getUserById(@Param('id') id: number): Promise<UserDto> {
+    return userMapper.toDto(await this.userService.getUserById(id));
   }
 }
