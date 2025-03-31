@@ -16,4 +16,8 @@ export class UserRepository {
   findAll(): Promise<User[]> {
     return this.repository.find();
   }
+
+  save(user: User): Promise<User> {
+    return this.repository.save(user);
+  }
 }
