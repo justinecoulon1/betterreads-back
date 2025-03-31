@@ -10,7 +10,7 @@ export class Book {
   @Length(1, 200)
   title: string;
 
-  @Column()
+  @Column('varchar', { array: true })
   genre: string[];
 
   @CreateDateColumn({ name: 'created_at' })

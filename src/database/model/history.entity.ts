@@ -1,5 +1,4 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { JoinColumn } from 'typeorm/browser';
+import { CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Book } from './book.entity';
 
@@ -7,12 +6,6 @@ import { Book } from './book.entity';
 export class History {
   @PrimaryGeneratedColumn({ name: 'history_id' })
   id: number;
-
-  @Column()
-  commentary: string;
-
-  @Column()
-  score: number;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
@@ -28,9 +21,7 @@ export class History {
   @JoinColumn({ name: 'book_id' })
   book: Promise<Book>;
 
-  constructor(commentary: string, score: number, createdAt: Date, updatedAt: Date, user: User, book: Book) {
-    this.commentary = commentary;
-    this.score = score;
+  constructor(createdAt: Date, updatedAt: Date, user: User, book: Book) {
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.user = Promise.resolve(user);

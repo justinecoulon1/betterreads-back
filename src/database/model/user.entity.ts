@@ -1,7 +1,7 @@
 import { IsEmail, Length } from 'class-validator';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { Review } from './review';
 import { Shelve } from './shelve.entity';
+import { Review } from './review.entity';
 
 @Entity('app_user')
 export class User {
@@ -28,7 +28,7 @@ export class User {
   @OneToMany(() => Review, (review) => review.user)
   reviews: Promise<Review[]>;
 
-  @OneToMany(() => Shelve, (shelves) => shelves.user)
+  @OneToMany(() => Shelve, (shelve) => shelve.user)
   shelves: Promise<Shelve[]>;
 
   constructor(name: string, email: string, password: string, createdAt: Date, updatedAt: Date) {

@@ -1,5 +1,12 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { JoinColumn } from 'typeorm/browser';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from './user.entity';
 import { Length } from 'class-validator';
 
@@ -14,11 +21,11 @@ export class Shelve {
   @PrimaryGeneratedColumn({ name: 'shelve_id' })
   id: number;
 
-  @Column({ length: 200 })
-  @Length(1, 200)
+  @Column({ length: 100 })
+  @Length(1, 100)
   name: string;
 
-  @Column()
+  @Column({ name: 'shelve_type' })
   type: ShelveType;
 
   @CreateDateColumn({ name: 'created_at' })
