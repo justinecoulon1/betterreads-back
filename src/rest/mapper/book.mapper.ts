@@ -22,6 +22,7 @@ class BookMapper {
       title: entity.title,
       createdAt: entity.createdAt,
       genres: entity.genres,
+      releaseDate: entity.releaseDate,
       authors: authorMapper.toDtos(await entity.authors),
     };
   }

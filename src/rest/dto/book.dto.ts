@@ -13,4 +13,5 @@ export type BookDto = {
   createdAt: Date;
   genres: string[];
   authors: AuthorDto[];
+  releaseDate: Date;
 };

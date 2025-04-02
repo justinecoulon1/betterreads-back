@@ -23,6 +23,9 @@ export class Book {
   @Column('varchar', { array: true })
   genres: string[];
 
+  @Column({ name: 'release_date' })
+  releaseDate: Date;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
@@ -57,10 +60,11 @@ export class Book {
   })
   authors: Promise<Author[]>;
 
-  constructor(title: string, genres: string[], createdAt: Date, updatedAt: Date) {
+  constructor(title: string, genres: string[], releaseDate: Date, createdAt: Date, updatedAt: Date) {
     this.title = title;
     this.genres = genres;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.releaseDate = releaseDate;
   }
 }
