@@ -17,8 +17,12 @@ export class BookRepository {
     return this.repository.find();
   }
 
-  findFiveLast(): Promise<Book[]> {
-    return this.repository.find({ order: { createdAt: 'DESC' }, take: 5 });
+  findLatest(): Promise<Book[]> {
+    return this.repository.find({
+      order: { createdAt: 'DESC' },
+      take: 5,
+      relations: { authors: true },
+    });
   }
 
   findById(id: number): Promise<Book> {

@@ -8,8 +8,8 @@ export class BookController {
   constructor(private readonly bookService: BookService) {}
 
   @Get('/latest')
-  async getFiveLastBooks(): Promise<BookListDto[]> {
-    return bookMapper.toBookListDtos(await this.bookService.getFiveLastBooks());
+  async getLatestBooks(): Promise<BookListDto[]> {
+    return bookMapper.toBookListDtos(await this.bookService.getLatestBooks());
   }
 
   @Get('/:id')

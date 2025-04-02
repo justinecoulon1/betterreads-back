@@ -6,8 +6,8 @@ import { Book } from '../../database/model/book.entity';
 export class BookService {
   constructor(private readonly bookRepository: BookRepository) {}
 
-  getFiveLastBooks(): Promise<Book[]> {
-    return this.bookRepository.findFiveLast();
+  getLatestBooks(): Promise<Book[]> {
+    return this.bookRepository.findLatest();
   }
 
   getBookById(id: number): Promise<Book> {

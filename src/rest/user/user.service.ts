@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from '../../database/user/user.repository';
 import { User } from '../../database/model/user.entity';
 import { PasswordService } from '../utils/auth/password.service';
@@ -15,6 +15,10 @@ export class UserService {
   }
 
   async createUser(name: string, email: string, password: string): Promise<User> {
+    const user = await this.userRepository.findByEmail(email.toLowerCase());
+    if (user) {
+      throw new ConflictException('Email address already in use');
+    }
     const hashedPassword = await this.passwordService.hashPassword(password);
     const newUser = new User(name, email, hashedPassword, new Date(), new Date());
     return this.userRepository.save(newUser);
@@ -25,7 +29,7 @@ export class UserService {
   }
 
   async getUser(email: string, password: string): Promise<User> {
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email.toLowerCase());
     if (!user) {
       throw new NotFoundException('User not found');
     }
