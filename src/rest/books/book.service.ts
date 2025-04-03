@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { BookRepository } from '../../database/book/book.repository';
 import { Book } from '../../database/model/book.entity';
-import { checkISBNValidity } from '../isbn/isbn.service';
+import { checkISBNValidity, generateISBN10, generateISBN13 } from '../isbn/isbn.service';
 
 @Injectable()
 export class BookService {
@@ -43,5 +43,20 @@ export class BookService {
     }
 
     return false;
+  }
+
+  createBook(title: string, releaseDate: Date, genres: string[], isbn: string): Promise<Book> {
+    const cleanISBN = isbn.replace(/[-\s]/g, '');
+    const book = new Book(title, genres, releaseDate, '', '', new Date(), new Date());
+    console.log(cleanISBN);
+    if (/^\d{9}[\dX]$/.test(cleanISBN)) {
+      book.isbn10 = isbn;
+      book.isbn13 = generateISBN13(isbn);
+    } else if (/^\d{13}$/.test(cleanISBN)) {
+      book.isbn13 = isbn;
+      book.isbn10 = generateISBN10(isbn);
+    }
+
+    return this.bookRepository.save(book);
   }
 }

@@ -16,3 +16,10 @@ export type BookDto = {
   isbn13: string;
   releaseDate: Date;
 };
+
+export type CreateBookRequestDto = {
+  title: string;
+  releaseDate: Date;
+  genres: string[];
+  isbn: string;
+};

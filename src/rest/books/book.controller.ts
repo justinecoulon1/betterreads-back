@@ -1,7 +1,7 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { BookService } from './book.service';
 import bookMapper from '../mapper/book.mapper';
-import { BookDto, BookListDto } from '../dto/book.dto';
+import { BookDto, BookListDto, CreateBookRequestDto } from '../dto/book.dto';
 
 @Controller('/books')
 export class BookController {
@@ -22,9 +22,15 @@ export class BookController {
     return await this.bookService.checkBookExists(isbn);
   }
 
-  //
-  // @Post('/:isbn')
-  // async createBook(@Param('isbn') isbn: string): Promise<BookDto> {
-  //   return bookMapper.toBookDto(await this.bookService.createBook(isbn));
-  // }
+  @Post('/')
+  async createBook(@Body() createBookRequestDto: CreateBookRequestDto): Promise<BookDto> {
+    return bookMapper.toBookDto(
+      await this.bookService.createBook(
+        createBookRequestDto.title,
+        createBookRequestDto.releaseDate,
+        createBookRequestDto.genres,
+        createBookRequestDto.isbn,
+      ),
+    );
+  }
 }
