@@ -26,6 +26,12 @@ export class Book {
   @Column({ name: 'release_date' })
   releaseDate: Date;
 
+  @Column({ name: 'isbn_10' })
+  isbn10: number;
+
+  @Column({ name: 'isbn_13' })
+  isbn13: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
@@ -34,7 +40,7 @@ export class Book {
 
   @ManyToMany(() => Shelf, (shelf) => shelf.books)
   @JoinTable({
-    name: 'shelfbook',
+    name: 'shelf_book',
     joinColumn: {
       name: 'book_id',
       referencedColumnName: 'id',
@@ -48,7 +54,7 @@ export class Book {
 
   @ManyToMany(() => Author, (author) => author.books)
   @JoinTable({
-    name: 'bookauthor',
+    name: 'book_author',
     joinColumn: {
       name: 'book_id',
       referencedColumnName: 'id',
@@ -60,11 +66,21 @@ export class Book {
   })
   authors: Promise<Author[]>;
 
-  constructor(title: string, genres: string[], releaseDate: Date, createdAt: Date, updatedAt: Date) {
+  constructor(
+    title: string,
+    genres: string[],
+    releaseDate: Date,
+    isbn10: number,
+    isbn13: number,
+    createdAt: Date,
+    updatedAt: Date,
+  ) {
     this.title = title;
     this.genres = genres;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.releaseDate = releaseDate;
+    this.isbn10 = isbn10;
+    this.isbn13 = isbn13;
   }
 }
