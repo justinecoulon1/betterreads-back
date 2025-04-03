@@ -4,7 +4,6 @@ export type BookListDto = {
   id: number;
   title: string;
   authors: AuthorDto[];
-  createdAt: Date;
 };
 
 export type BookDto = {
@@ -13,5 +12,7 @@ export type BookDto = {
   createdAt: Date;
   genres: string[];
   authors: AuthorDto[];
+  isbn10: string;
+  isbn13: string;
   releaseDate: Date;
 };

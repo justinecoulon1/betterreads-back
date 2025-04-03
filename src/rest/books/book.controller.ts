@@ -16,4 +16,15 @@ export class BookController {
   async getBookById(@Param('id') id: number): Promise<BookDto> {
     return bookMapper.toBookDto(await this.bookService.getBookById(id));
   }
+
+  @Get('/isbn/:isbn')
+  async checkBookIsbn(@Param('isbn') isbn: string): Promise<boolean> {
+    return await this.bookService.checkBookExists(isbn);
+  }
+
+  //
+  // @Post('/:isbn')
+  // async createBook(@Param('isbn') isbn: string): Promise<BookDto> {
+  //   return bookMapper.toBookDto(await this.bookService.createBook(isbn));
+  // }
 }

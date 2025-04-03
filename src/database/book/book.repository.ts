@@ -30,4 +30,20 @@ export class BookRepository {
       id,
     });
   }
+
+  findByIsbn10(isbn10: string): Promise<Book> {
+    return this.repository.findOneBy({
+      isbn10,
+    });
+  }
+
+  findByIsbn13(isbn13: string): Promise<Book> {
+    return this.repository.findOneBy({
+      isbn13,
+    });
+  }
+
+  save(book: Book): Promise<Book> {
+    return this.repository.save(book);
+  }
 }

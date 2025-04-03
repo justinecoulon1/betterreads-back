@@ -27,10 +27,10 @@ export class Book {
   releaseDate: Date;
 
   @Column({ name: 'isbn_10' })
-  isbn10: number;
+  isbn10: string;
 
   @Column({ name: 'isbn_13' })
-  isbn13: number;
+  isbn13: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
@@ -70,8 +70,8 @@ export class Book {
     title: string,
     genres: string[],
     releaseDate: Date,
-    isbn10: number,
-    isbn13: number,
+    isbn10: string,
+    isbn13: string,
     createdAt: Date,
     updatedAt: Date,
   ) {
