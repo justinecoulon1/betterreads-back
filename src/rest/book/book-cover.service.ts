@@ -15,14 +15,14 @@ export class BookCoverService {
     }
   }
 
-  getCoverBase64(isbn13: string): string | undefined {
+  getCoverStream(isbn13: string): fs.ReadStream {
     const imagePath = path.join(this.coversFolder, `${isbn13}.jpg`);
 
     if (!fs.existsSync(imagePath)) {
       return undefined;
     }
 
-    return fs.readFileSync(imagePath, { encoding: 'base64' });
+    return fs.createReadStream(imagePath);
   }
 
   saveCover(isbn13: string, imageBuffer: Buffer): void {

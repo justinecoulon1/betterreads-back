@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { BookService } from './book.service';
 import bookMapper from '../mapper/book.mapper';
 import { BookDto, BookListDto, CreateBookRequestDto, PreloadedBookInfoDto } from '../dto/book.dto';
+import { Response } from 'express';
 
 @Controller('/books')
 export class BookController {
@@ -25,5 +26,11 @@ export class BookController {
   @Post('/')
   async createBook(@Body() createBookRequestDto: CreateBookRequestDto): Promise<BookDto> {
     return bookMapper.toBookDto(await this.bookService.createBook(createBookRequestDto));
+  }
+
+  @Get('/cover/:isbn')
+  getBookCoverImage(@Param('isbn') isbn: string, @Res() res: Response) {
+    const fileStream = this.bookService.getBookCoverImageStream(isbn);
+    fileStream.pipe(res);
   }
 }

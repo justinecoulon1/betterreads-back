@@ -11,6 +11,10 @@ export class Author {
   @Length(2, 100)
   name: string;
 
+  @Column({ length: 100 })
+  @Length(2, 100)
+  slug: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
@@ -20,8 +24,9 @@ export class Author {
   @ManyToMany(() => Book, (book) => book.authors)
   books: Promise<Book[]>;
 
-  constructor(name: string, createdAt: Date, updatedAt: Date) {
+  constructor(name: string, slug: string, createdAt: Date, updatedAt: Date) {
     this.name = name;
+    this.slug = slug;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }

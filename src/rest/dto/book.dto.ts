@@ -3,6 +3,7 @@ import { AuthorDto } from './author.dto';
 export type BookListDto = {
   id: number;
   title: string;
+  isbn: string;
   authors: AuthorDto[];
 };
 
@@ -18,7 +19,6 @@ export type BookDto = {
   editor: string;
   editionLanguage: string;
   description?: string;
-  coverImage?: string;
 };
 
 export type CreateBookRequestDto = {
@@ -29,12 +29,11 @@ export type CreateBookRequestDto = {
   editor: string;
   editionLanguage: string;
   description?: string;
-  authorsName: string[];
+  authorNames: string[];
 };
 
 export type PreloadedBookInfoDto = {
   description?: string;
-  coverImage?: string;
   pages?: number;
   releaseDate?: string;
   authorNames?: string[];

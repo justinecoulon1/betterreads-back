@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { BookRepository } from '../../database/book/book.repository';
 import { Book } from '../../database/model/book.entity';
 import { IsbnService } from '../utils/isbn/isbn.service';
@@ -7,6 +7,12 @@ import { BookAlreadyExistsException, BookNotFoundException } from './book.except
 import { CreateBookRequestDto, IsbnDbBookResponseDto, PreloadedBookInfoDto } from '../dto/book.dto';
 import axios from 'axios';
 import { BookCoverService } from './book-cover.service';
+import { AuthorService } from '../author/author.service';
+import { AuthorRepository } from '../../database/author/author.repository';
+import { Author } from '../../database/model/author.entity';
+import { TransactionService } from '../../database/utils/transaction/transaction.service';
+import * as fs from 'node:fs';
+import { InvalidIsbnException } from '../utils/isbn/isbn.exceptions';
 
 @Injectable()
 export class BookService {
@@ -16,6 +22,9 @@ export class BookService {
     private readonly bookRepository: BookRepository,
     private readonly isbnService: IsbnService,
     private readonly bookCoverService: BookCoverService,
+    private readonly authorService: AuthorService,
+    private readonly authorRepository: AuthorRepository,
+    private readonly transactionService: TransactionService,
   ) {}
 
   getLatestBooks(): Promise<Book[]> {
@@ -40,7 +49,7 @@ export class BookService {
     return null;
   }
 
-  createBook(createBookRequestDto: CreateBookRequestDto): Promise<Book> {
+  async createBook(createBookRequestDto: CreateBookRequestDto): Promise<Book> {
     const {
       title,
       releaseDate,
@@ -48,24 +57,51 @@ export class BookService {
       isbn: rawIsbn,
       editor,
       editionLanguage,
-      authorsName,
+      authorNames,
       description,
     } = createBookRequestDto;
     const isbn = this.isbnService.parseIsbn(rawIsbn);
     const isbnPair = this.isbnService.getIsbnPair(isbn);
-    const book = new Book(
-      title,
-      genres,
-      releaseDate,
-      editor,
-      editionLanguage,
-      isbnPair.isbn10.value,
-      isbnPair.isbn13.value,
-      new Date(),
-      new Date(),
-      description,
+
+    const authorSlugByName: Record<string, string> = {};
+    authorNames.forEach((authorName) => (authorSlugByName[authorName] = this.authorService.getAuthorSlug(authorName)));
+    const existingAuthors = await this.authorRepository.findBySlugs(Object.values(authorSlugByName));
+
+    const existingAuthorBySlug: Record<string, Author> = {};
+    existingAuthors.forEach((existingAuthor) => (existingAuthorBySlug[existingAuthor.slug] = existingAuthor));
+
+    const toCreateAuthorNames = authorNames.filter((authorName) => {
+      const slug = authorSlugByName[authorName];
+      const existingAuthor = existingAuthorBySlug[slug];
+      return !existingAuthor;
+    });
+
+    const toCreateAuthors = toCreateAuthorNames.map(
+      (toCreateAuthorName) =>
+        new Author(toCreateAuthorName, authorSlugByName[toCreateAuthorName], new Date(), new Date()),
     );
-    return this.bookRepository.save(book);
+
+    const bookAuthors = [...toCreateAuthors, ...existingAuthors];
+
+    return this.transactionService.wrapInTransaction(async () => {
+      const savedBookAuthors = await this.authorRepository.saveAll(bookAuthors);
+
+      const book = new Book(
+        title,
+        genres,
+        releaseDate,
+        editor,
+        editionLanguage,
+        isbnPair.isbn10.value,
+        isbnPair.isbn13.value,
+        new Date(),
+        new Date(),
+        savedBookAuthors,
+        description,
+      );
+
+      return this.bookRepository.save(book);
+    });
   }
 
   async getPreloadedBookInfoDto(rawIsbn: string): Promise<PreloadedBookInfoDto> {
@@ -90,22 +126,18 @@ export class BookService {
     );
 
     const isbnDbBookDto = isbnDbBookResponseDto.book;
-
     if (!isbnDbBookDto) {
       return {};
     }
 
-    let existingCoverImage = this.bookCoverService.getCoverBase64(isbn.value);
-    if (!existingCoverImage && isbnDbBookDto.image) {
-      const { data: newImageData } = await axios.get<string>(isbnDbBookDto.image, {
+    if (!this.bookCoverService.exists(isbn.value) && isbnDbBookDto.image) {
+      const { data: newImageData } = await axios.get<Buffer>(isbnDbBookDto.image, {
         responseType: 'arraybuffer',
       });
-      this.bookCoverService.saveCover(isbn.value, Buffer.from(newImageData, 'binary'));
-      existingCoverImage = this.bookCoverService.getCoverBase64(isbn.value);
+      this.bookCoverService.saveCover(isbn.value, newImageData);
     }
     return {
       description: isbnDbBookDto.synopsis?.replace(/<br>/g, '\n')?.replace(/<br\/>/g, '\n'),
-      coverImage: existingCoverImage,
       editor: isbnDbBookDto.publisher,
       editionLanguage: isbnDbBookDto.language,
       releaseDate: isbnDbBookDto.date_published,
@@ -113,5 +145,17 @@ export class BookService {
       title: isbnDbBookDto.title,
       authorNames: isbnDbBookDto.authors,
     };
+  }
+
+  getBookCoverImageStream(rawIsbn: string): fs.ReadStream {
+    const isbn = this.isbnService.parseIsbn(rawIsbn);
+    if (isbn.type !== IsbnType.ISBN_13) {
+      throw new InvalidIsbnException();
+    }
+    const readStream = this.bookCoverService.getCoverStream(isbn.value);
+    if (!readStream) {
+      throw new NotFoundException();
+    }
+    return readStream;
   }
 }

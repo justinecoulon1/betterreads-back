@@ -7,7 +7,8 @@ class BookMapper {
     return {
       id: entity.id,
       title: entity.title,
-      authors: authorMapper.toDtos(await entity.authors),
+      isbn: entity.isbn13,
+      authors: authorMapper.toDtos((await entity.authors) ?? []),
     };
   }
 
