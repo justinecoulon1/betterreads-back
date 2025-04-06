@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { BookService } from './book.service';
 import bookMapper from '../mapper/book.mapper';
-import { BookDto, BookListDto, CreateBookRequestDto } from '../dto/book.dto';
+import { BookDto, BookListDto, CreateBookRequestDto, PreloadedBookInfoDto } from '../dto/book.dto';
 
 @Controller('/books')
 export class BookController {
@@ -17,20 +17,13 @@ export class BookController {
     return bookMapper.toBookDto(await this.bookService.getBookById(id));
   }
 
-  @Get('/isbn/:isbn')
-  async checkBookIsbn(@Param('isbn') isbn: string): Promise<boolean> {
-    return await this.bookService.checkBookExists(isbn);
+  @Get('/preload/:isbn')
+  async preloadBookInfo(@Param('isbn') isbn: string): Promise<PreloadedBookInfoDto> {
+    return this.bookService.getPreloadedBookInfoDto(isbn);
   }
 
   @Post('/')
   async createBook(@Body() createBookRequestDto: CreateBookRequestDto): Promise<BookDto> {
-    return bookMapper.toBookDto(
-      await this.bookService.createBook(
-        createBookRequestDto.title,
-        createBookRequestDto.releaseDate,
-        createBookRequestDto.genres,
-        createBookRequestDto.isbn,
-      ),
-    );
+    return bookMapper.toBookDto(await this.bookService.createBook(createBookRequestDto));
   }
 }

@@ -15,6 +15,10 @@ export type BookDto = {
   isbn10: string;
   isbn13: string;
   releaseDate: Date;
+  editor: string;
+  editionLanguage: string;
+  description?: string;
+  coverImage?: string;
 };
 
 export type CreateBookRequestDto = {
@@ -22,4 +26,32 @@ export type CreateBookRequestDto = {
   releaseDate: Date;
   genres: string[];
   isbn: string;
+  editor: string;
+  editionLanguage: string;
+  description?: string;
+  authorsName: string[];
+};
+
+export type PreloadedBookInfoDto = {
+  description?: string;
+  coverImage?: string;
+  pages?: number;
+  releaseDate?: string;
+  authorNames?: string[];
+  title?: string;
+  editionLanguage?: string;
+  editor?: string;
+};
+
+export type IsbnDbBookResponseDto = {
+  book?: {
+    synopsis?: string;
+    pages?: number;
+    image?: string;
+    date_published?: string;
+    authors?: string[];
+    title?: string;
+    language?: string;
+    publisher?: string;
+  };
 };

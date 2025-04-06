@@ -24,6 +24,9 @@ class BookMapper {
       releaseDate: entity.releaseDate,
       isbn10: entity.isbn10,
       isbn13: entity.isbn13,
+      editor: entity.editor,
+      editionLanguage: entity.editionLanguage,
+      description: entity?.description,
       authors: authorMapper.toDtos(await entity.authors),
     };
   }

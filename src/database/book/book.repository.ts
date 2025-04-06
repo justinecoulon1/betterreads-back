@@ -25,19 +25,19 @@ export class BookRepository {
     });
   }
 
-  findById(id: number): Promise<Book> {
+  findById(id: number): Promise<Book | null> {
     return this.repository.findOneBy({
       id,
     });
   }
 
-  findByIsbn10(isbn10: string): Promise<Book> {
+  findByIsbn10(isbn10: string): Promise<Book | null> {
     return this.repository.findOneBy({
       isbn10,
     });
   }
 
-  findByIsbn13(isbn13: string): Promise<Book> {
+  findByIsbn13(isbn13: string): Promise<Book | null> {
     return this.repository.findOneBy({
       isbn13,
     });

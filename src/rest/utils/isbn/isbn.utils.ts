@@ -1,15 +1,29 @@
-export function checkISBNValidity(isbn: string, isbnType: string): boolean {
-  let isValid = false;
-  if (isbnType === 'isbn10') {
-    isValid = isValidISBN10(isbn);
-  } else if (isbnType === 'isbn13') {
-    isValid = isValidISBN13(isbn);
-  }
+import { Isbn, IsbnType } from './isbn.types';
 
-  return isValid;
+export function getCleanIsbn(rawIsbn: string): string {
+  return rawIsbn.replace(/[-\s]/g, '');
 }
 
-export function isValidISBN10(isbn10: string): boolean {
+export function getIsbnType(isbn: string): IsbnType | undefined {
+  if (/^\d{9}[\dX]$/.test(isbn)) {
+    return IsbnType.ISBN_10;
+  }
+  if (/^\d{13}$/.test(isbn)) {
+    return IsbnType.ISBN_13;
+  }
+  return undefined;
+}
+
+export function isValidIsbn(isbn: Isbn): boolean {
+  if (isbn.type === IsbnType.ISBN_10) {
+    return isValidIsbn10(isbn.value);
+  } else if (isbn.type === IsbnType.ISBN_13) {
+    return isValidIsbn13(isbn.value);
+  }
+  return false;
+}
+
+function isValidIsbn10(isbn10: string): boolean {
   let sum = 0;
 
   for (let i = 0; i < 9; i++) {
@@ -24,7 +38,7 @@ export function isValidISBN10(isbn10: string): boolean {
   return sum % 11 === 0;
 }
 
-export function isValidISBN13(isbn13: string): boolean {
+function isValidIsbn13(isbn13: string): boolean {
   let sum = 0;
 
   for (let i = 0; i < 12; i++) {
@@ -37,7 +51,7 @@ export function isValidISBN13(isbn13: string): boolean {
   return checkDigit === parseInt(isbn13[12], 10);
 }
 
-export function generateISBN10(isbn13: string): string {
+export function generateIsbn10(isbn13: string): string {
   const baseISBN10 = isbn13.substring(3, 12);
 
   const checkDigit = computeIsbn10CheckDigit(baseISBN10);
@@ -45,7 +59,7 @@ export function generateISBN10(isbn13: string): string {
   return baseISBN10 + checkDigit;
 }
 
-export function generateISBN13(isbn10: string): string {
+export function generateIsbn13(isbn10: string): string {
   const baseISBN13 = '978' + isbn10.substring(0, 9);
 
   const checkDigit = computeIsbn13CheckDigit(baseISBN13);
