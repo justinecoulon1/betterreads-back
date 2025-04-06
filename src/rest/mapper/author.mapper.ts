@@ -6,6 +6,7 @@ class AuthorMapper {
     return {
       id: entity.id,
       name: entity.name,
+      slug: entity.slug,
     };
   }
 

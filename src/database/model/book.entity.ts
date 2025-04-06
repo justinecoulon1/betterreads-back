@@ -26,6 +26,24 @@ export class Book {
   @Column({ name: 'release_date' })
   releaseDate: Date;
 
+  @Column()
+  editor: string;
+
+  @Column({ name: 'edition_language' })
+  editionLanguage: string;
+
+  @Column()
+  description?: string;
+
+  @Column()
+  pages?: number;
+
+  @Column({ name: 'isbn_10' })
+  isbn10: string;
+
+  @Column({ name: 'isbn_13' })
+  isbn13: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
@@ -34,7 +52,7 @@ export class Book {
 
   @ManyToMany(() => Shelf, (shelf) => shelf.books)
   @JoinTable({
-    name: 'shelfbook',
+    name: 'shelf_book',
     joinColumn: {
       name: 'book_id',
       referencedColumnName: 'id',
@@ -48,7 +66,7 @@ export class Book {
 
   @ManyToMany(() => Author, (author) => author.books)
   @JoinTable({
-    name: 'bookauthor',
+    name: 'book_author',
     joinColumn: {
       name: 'book_id',
       referencedColumnName: 'id',
@@ -60,11 +78,32 @@ export class Book {
   })
   authors: Promise<Author[]>;
 
-  constructor(title: string, genres: string[], releaseDate: Date, createdAt: Date, updatedAt: Date) {
+  constructor(
+    title: string,
+    genres: string[],
+    releaseDate: Date,
+    editor: string,
+    editionLanguage: string,
+    isbn10: string,
+    isbn13: string,
+    createdAt: Date,
+    updatedAt: Date,
+    authors: Author[],
+    description?: string,
+    pages?: number,
+  ) {
     this.title = title;
     this.genres = genres;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
     this.releaseDate = releaseDate;
+    this.editor = editor;
+    this.editionLanguage = editionLanguage;
+    this.isbn10 = isbn10;
+    this.isbn13 = isbn13;
+    this.authors = Promise.resolve(authors);
+    this.shelves = Promise.resolve<Shelf[]>([]);
+    this.description = description;
+    this.pages = pages;
   }
 }

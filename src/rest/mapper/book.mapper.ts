@@ -7,8 +7,8 @@ class BookMapper {
     return {
       id: entity.id,
       title: entity.title,
-      createdAt: entity.createdAt,
-      authors: authorMapper.toDtos(await entity.authors),
+      isbn: entity.isbn13,
+      authors: authorMapper.toDtos((await entity.authors) ?? []),
     };
   }
 
@@ -23,6 +23,11 @@ class BookMapper {
       createdAt: entity.createdAt,
       genres: entity.genres,
       releaseDate: entity.releaseDate,
+      isbn10: entity.isbn10,
+      isbn13: entity.isbn13,
+      editor: entity.editor,
+      editionLanguage: entity.editionLanguage,
+      description: entity?.description,
       authors: authorMapper.toDtos(await entity.authors),
     };
   }
