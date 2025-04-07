@@ -3,10 +3,14 @@ import { BookService } from './book.service';
 import bookMapper from '../mapper/book.mapper';
 import { BookDto, BookListDto, CreateBookRequestDto, PreloadedBookInfoDto } from '../dto/book.dto';
 import { Response } from 'express';
+import { IsbnService } from '../utils/isbn/isbn.service';
 
 @Controller('/books')
 export class BookController {
-  constructor(private readonly bookService: BookService) {}
+  constructor(
+    private readonly bookService: BookService,
+    private readonly isbnService: IsbnService,
+  ) {}
 
   @Get('/latest')
   async getLatestBooks(): Promise<BookListDto[]> {
@@ -16,6 +20,12 @@ export class BookController {
   @Get('/:id')
   async getBookById(@Param('id') id: number): Promise<BookDto> {
     return bookMapper.toBookDto(await this.bookService.getBookById(id));
+  }
+
+  @Get('/isbn/:isbn')
+  async getBookByIsbn(@Param('isbn') rawIsbn: string): Promise<BookDto> {
+    const isbn = this.isbnService.parseIsbn(rawIsbn);
+    return bookMapper.toBookDto(await this.bookService.getBookByIsbn(isbn));
   }
 
   @Get('/preload/:isbn')

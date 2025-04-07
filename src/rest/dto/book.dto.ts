@@ -3,7 +3,7 @@ import { AuthorDto } from './author.dto';
 export type BookListDto = {
   id: number;
   title: string;
-  isbn: string;
+  isbn13: string;
   authors: AuthorDto[];
 };
 
@@ -33,6 +33,7 @@ export type CreateBookRequestDto = {
 };
 
 export type PreloadedBookInfoDto = {
+  isbn13: string;
   description?: string;
   pages?: number;
   releaseDate?: string;

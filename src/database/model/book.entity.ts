@@ -88,7 +88,6 @@ export class Book {
     isbn13: string,
     createdAt: Date,
     updatedAt: Date,
-    authors: Author[],
     description?: string,
     pages?: number,
   ) {
@@ -101,8 +100,6 @@ export class Book {
     this.editionLanguage = editionLanguage;
     this.isbn10 = isbn10;
     this.isbn13 = isbn13;
-    this.authors = Promise.resolve(authors);
-    this.shelves = Promise.resolve<Shelf[]>([]);
     this.description = description;
     this.pages = pages;
   }

@@ -96,10 +96,9 @@ export class BookService {
         isbnPair.isbn13.value,
         new Date(),
         new Date(),
-        savedBookAuthors,
         description,
       );
-
+      book.authors = Promise.resolve(savedBookAuthors);
       return this.bookRepository.save(book);
     });
   }
@@ -127,7 +126,7 @@ export class BookService {
 
     const isbnDbBookDto = isbnDbBookResponseDto.book;
     if (!isbnDbBookDto) {
-      return {};
+      return { isbn13: isbn.value };
     }
 
     if (!this.bookCoverService.exists(isbn.value) && isbnDbBookDto.image) {
@@ -144,6 +143,7 @@ export class BookService {
       pages: isbnDbBookDto.pages,
       title: isbnDbBookDto.title,
       authorNames: isbnDbBookDto.authors,
+      isbn13: isbn.value,
     };
   }
 

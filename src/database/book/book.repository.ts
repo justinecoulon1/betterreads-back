@@ -26,8 +26,9 @@ export class BookRepository {
   }
 
   findById(id: number): Promise<Book | null> {
-    return this.repository.findOneBy({
-      id,
+    return this.repository.findOne({
+      where: { id },
+      relations: { authors: true },
     });
   }
 
