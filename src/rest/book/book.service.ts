@@ -63,6 +63,11 @@ export class BookService {
     const isbn = this.isbnService.parseIsbn(rawIsbn);
     const isbnPair = this.isbnService.getIsbnPair(isbn);
 
+    const existingIsbn = await this.bookRepository.findByIsbn13(isbnPair.isbn13.value);
+    if (existingIsbn) {
+      throw new BookAlreadyExistsException();
+    }
+
     const authorSlugByName: Record<string, string> = {};
     authorNames.forEach((authorName) => (authorSlugByName[authorName] = this.authorService.getAuthorSlug(authorName)));
     const existingAuthors = await this.authorRepository.findBySlugs(Object.values(authorSlugByName));
@@ -114,15 +119,20 @@ export class BookService {
       throw new BookAlreadyExistsException();
     }
 
-    const { data: isbnDbBookResponseDto } = await axios.get<IsbnDbBookResponseDto>(
-      `https://api2.isbndb.com/book/${isbn.value}`,
-      {
+    let isbnDbBookResponseDto: IsbnDbBookResponseDto;
+    try {
+      const { data } = await axios.get<IsbnDbBookResponseDto>(`https://api2.isbndb.com/book/${isbn.value}`, {
         headers: {
           Authorization: this.isbnDbApiKey,
           'Content-Type': 'application/json',
         },
-      },
-    );
+      });
+
+      isbnDbBookResponseDto = data;
+    } catch (err) {
+      console.error(err);
+      return { isbn13: isbn.value };
+    }
 
     const isbnDbBookDto = isbnDbBookResponseDto.book;
     if (!isbnDbBookDto) {

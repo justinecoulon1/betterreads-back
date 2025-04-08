@@ -19,7 +19,7 @@ export class BookCoverService {
     const imagePath = path.join(this.coversFolder, `${isbn13}.jpg`);
 
     if (!fs.existsSync(imagePath)) {
-      return undefined;
+      return fs.createReadStream('./images/book.png');
     }
 
     return fs.createReadStream(imagePath);
