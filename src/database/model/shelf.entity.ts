@@ -49,6 +49,8 @@ export class Shelf {
     this.type = type;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
-    this.user = Promise.resolve(user);
+    if (user) {
+      this.user = Promise.resolve(user);
+    }
   }
 }

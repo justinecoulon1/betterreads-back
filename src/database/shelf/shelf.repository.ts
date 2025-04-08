@@ -29,4 +29,15 @@ export class ShelfRepository {
   saveAll(shelf: Shelf[]): Promise<Shelf[]> {
     return this.repository.save(shelf);
   }
+
+  remove(shelf: Shelf): Promise<Shelf> {
+    return this.repository.remove(shelf);
+  }
+
+  findById(id: number): Promise<Shelf | null> {
+    return this.repository.findOne({
+      where: { id },
+      relations: { user: true },
+    });
+  }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { ShelfService } from './shelf.service';
 import shelfMapper from '../mapper/shelf.mapper';
 import { CreateShelfRequestDto, ShelfDto } from '../dto/shelf.dto';
@@ -21,5 +21,10 @@ export class ShelfController {
   @Post('/:userId')
   async createShelf(@Param('userId') userId: number, @Body() createShelfDto: CreateShelfRequestDto): Promise<ShelfDto> {
     return shelfMapper.toDto(await this.shelfService.createShelf(createShelfDto.name, ShelfType.USER, userId));
+  }
+
+  @Delete('/:userId/:shelfId')
+  async removeShelf(@Param('userId') userId: string, @Param('shelfId') shelfId: string): Promise<ShelfDto> {
+    return shelfMapper.toDto(await this.shelfService.removeShelf(parseInt(userId), parseInt(shelfId)));
   }
 }
