@@ -12,10 +12,11 @@ import { User } from './user.entity';
 import { Length } from 'class-validator';
 import { Book } from './book.entity';
 
-enum ShelfType {
+export enum ShelfType {
   'READ' = 'READ',
   'TO_READ' = 'TO_READ',
   'READING' = 'READING',
+  'USER' = 'USER',
 }
 
 @Entity()
