@@ -1,8 +1,9 @@
 import { Shelf } from '../../database/model/shelf.entity';
-import { ShelfDto } from '../dto/shelf.dto';
+import { ShelfDto, SmallShelfDto } from '../dto/smallShelfDto';
+import bookMapper from './book.mapper';
 
 class ShelfMapper {
-  toDto(entity: Shelf): ShelfDto {
+  toSmallDto(entity: Shelf): SmallShelfDto {
     return {
       id: entity.id,
       name: entity.name,
@@ -11,8 +12,20 @@ class ShelfMapper {
     };
   }
 
-  toDtos(entities: Shelf[]): ShelfDto[] {
-    return entities.map((entity) => this.toDto(entity));
+  toSmallDtos(entities: Shelf[]): SmallShelfDto[] {
+    return entities.map((entity) => this.toSmallDto(entity));
+  }
+
+  async toDto(entity: Shelf): Promise<ShelfDto> {
+    return {
+      ...this.toSmallDto(entity),
+      books: await bookMapper.toBookDtos(await entity.books),
+    };
+  }
+
+  toDtos(entities: Shelf[]): Promise<ShelfDto[]> {
+    const dtoPromises = entities.map((entity) => this.toDto(entity));
+    return Promise.all(dtoPromises);
   }
 }
 
