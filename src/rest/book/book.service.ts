@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BookRepository } from '../../database/book/book.repository';
 import { Book } from '../../database/model/book.entity';
 import { IsbnService } from '../utils/isbn/isbn.service';
@@ -162,10 +162,6 @@ export class BookService {
     if (isbn.type !== IsbnType.ISBN_13) {
       throw new InvalidIsbnException();
     }
-    const readStream = this.bookCoverService.getCoverStream(isbn.value);
-    if (!readStream) {
-      throw new NotFoundException();
-    }
-    return readStream;
+    return this.bookCoverService.getCoverStream(isbn.value);
   }
 }
