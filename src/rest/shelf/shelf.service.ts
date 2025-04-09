@@ -1,7 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ShelfRepository } from '../../database/shelf/shelf.repository';
 import { Shelf, ShelfType } from '../../database/model/shelf.entity';
 import { UserRepository } from '../../database/user/user.repository';
+import { ShelfNotFoundException } from './shelf.exceptions';
 
 @Injectable()
 export class ShelfService {
@@ -19,6 +20,19 @@ export class ShelfService {
     return this.shelfRepository.findAll();
   }
 
+  async getShelfById(userId: number, shelfId: number): Promise<Shelf> {
+    const shelf = await this.shelfRepository.findById(shelfId);
+    if (!shelf) {
+      throw new ShelfNotFoundException();
+    }
+    const shelfUserId = (await shelf.user).id;
+    if (userId !== shelfUserId) {
+      throw new ForbiddenException();
+    }
+
+    return shelf;
+  }
+
   async createShelf(name: string, type: ShelfType, userId: number): Promise<Shelf> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
@@ -32,15 +46,13 @@ export class ShelfService {
   async removeShelf(userId: number, shelfId: number): Promise<Shelf> {
     const shelf = await this.shelfRepository.findById(shelfId);
     if (!shelf) {
-      throw new NotFoundException('shelf-not-found');
+      throw new ShelfNotFoundException();
     }
     if (shelf.type !== ShelfType.USER) {
-      console.log('wrong type');
       throw new ForbiddenException();
     }
     const shelfUserId = (await shelf.user).id;
     if (userId !== shelfUserId) {
-      console.log('wrong user');
       throw new ForbiddenException();
     }
 

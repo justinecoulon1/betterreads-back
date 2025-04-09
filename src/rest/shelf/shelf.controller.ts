@@ -23,6 +23,11 @@ export class ShelfController {
     return shelfMapper.toDto(await this.shelfService.createShelf(createShelfDto.name, ShelfType.USER, userId));
   }
 
+  @Get('/:userId/:shelfId')
+  async getShelfById(@Param('userId') userId: string, @Param('shelfId') shelfId: string): Promise<ShelfDto> {
+    return shelfMapper.toDto(await this.shelfService.getShelfById(parseInt(userId), parseInt(shelfId)));
+  }
+
   @Delete('/:userId/:shelfId')
   async removeShelf(@Param('userId') userId: string, @Param('shelfId') shelfId: string): Promise<ShelfDto> {
     return shelfMapper.toDto(await this.shelfService.removeShelf(parseInt(userId), parseInt(shelfId)));
