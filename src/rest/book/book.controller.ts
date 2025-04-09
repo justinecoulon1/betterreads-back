@@ -1,7 +1,13 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Res } from '@nestjs/common';
 import { BookService } from './book.service';
 import bookMapper from '../mapper/book.mapper';
-import { BookDto, BookListDto, CreateBookRequestDto, PreloadedBookInfoDto } from '../dto/book.dto';
+import {
+  AddBookToShelvesRequestDto,
+  BookDto,
+  BookListDto,
+  CreateBookRequestDto,
+  PreloadedBookInfoDto,
+} from '../dto/book.dto';
 import { Response } from 'express';
 import { IsbnService } from '../utils/isbn/isbn.service';
 
@@ -44,12 +50,17 @@ export class BookController {
     fileStream.pipe(res);
   }
 
-  @Post('/add/:userId/:bookIsbn/:shelfId')
-  async addBookToShelf(
+  @Post('/add/:userId')
+  async addBookToShelves(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('bookIsbn') bookIsbn: string,
-    @Param('shelfId', ParseIntPipe) shelfId: number,
+    @Body() addBookToShelvesRequestDto: AddBookToShelvesRequestDto,
   ): Promise<BookDto> {
-    return bookMapper.toBookDto(await this.bookService.addBookToShelf(userId, bookIsbn, shelfId));
+    return bookMapper.toBookDto(
+      await this.bookService.addBookToShelves(
+        userId,
+        addBookToShelvesRequestDto.isbn,
+        addBookToShelvesRequestDto.shelvesId,
+      ),
+    );
   }
 }

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { Shelf } from '../model/shelf.entity';
 import { User } from '../model/user.entity';
 
@@ -45,6 +45,13 @@ export class ShelfRepository {
   findById(id: number): Promise<Shelf | null> {
     return this.repository.findOne({
       where: { id },
+      relations: { user: true },
+    });
+  }
+
+  findAllById(id: number[]): Promise<Shelf[] | null> {
+    return this.repository.find({
+      where: { id: In(id) },
       relations: { user: true },
     });
   }

@@ -168,7 +168,7 @@ export class BookService {
     return this.bookCoverService.getCoverStream(isbn.value);
   }
 
-  async addBookToShelf(userId: number, rawIsbn: string, shelfId: number): Promise<Book> {
+  async addBookToShelves(userId: number, rawIsbn: string, shelvesId: number[]): Promise<Book> {
     const isbn = this.isbnService.parseIsbn(rawIsbn);
     if (isbn.type !== IsbnType.ISBN_13) {
       throw new InvalidIsbnException();
@@ -177,15 +177,17 @@ export class BookService {
     if (!book) {
       throw new BookNotFoundException();
     }
-    const shelf = await this.shelfRepository.findById(shelfId);
-    if (!shelf) {
+    const shelves = await this.shelfRepository.findAllById(shelvesId);
+    if (!shelves) {
       throw new ShelfNotFoundException();
     }
-    if ((await shelf.user).id !== userId) {
-      throw new ForbiddenException();
-    }
+    shelves.map(async (shelf) => {
+      if ((await shelf.user).id !== userId) {
+        throw new ForbiddenException();
+      }
+    });
 
-    book.shelves = Promise.resolve([...(await book.shelves), shelf]);
+    book.shelves = Promise.resolve([...(await book.shelves), ...shelves]);
     return this.bookRepository.save(book);
   }
 }

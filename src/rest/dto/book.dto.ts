@@ -55,3 +55,8 @@ export type IsbnDbBookResponseDto = {
     publisher?: string;
   };
 };
+
+export type AddBookToShelvesRequestDto = {
+  isbn: string;
+  shelvesId: number[];
+};
