@@ -7,9 +7,17 @@ import { BookCoverService } from './book-cover.service';
 import { AuthorModule } from '../author/author.module';
 import { AuthorRepositoryModule } from '../../database/author/author.repository.module';
 import { TransactionServiceModule } from '../../database/utils/transaction/transaction.service.module';
+import { ShelfRepositoryModule } from '../../database/shelf/shelf.repository.module';
 
 @Module({
-  imports: [BookRepositoryModule, IsbnModule, AuthorModule, AuthorRepositoryModule, TransactionServiceModule],
+  imports: [
+    BookRepositoryModule,
+    IsbnModule,
+    AuthorModule,
+    AuthorRepositoryModule,
+    TransactionServiceModule,
+    ShelfRepositoryModule,
+  ],
   controllers: [BookController],
   providers: [BookService, BookCoverService],
   exports: [BookService, BookCoverService],

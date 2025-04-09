@@ -11,8 +11,11 @@ export class ShelfService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async getUserShelves(id: number): Promise<Shelf[]> {
+  async getUserShelves(id: number, amount?: number): Promise<Shelf[]> {
     const user = await this.userRepository.findById(id);
+    if (amount) {
+      return this.shelfRepository.findLatestShelvesByUser(user, amount);
+    }
     return this.shelfRepository.findShelvesByUser(user);
   }
 
@@ -33,14 +36,16 @@ export class ShelfService {
     return shelf;
   }
 
-  async createShelf(name: string, type: ShelfType, userId: number): Promise<Shelf> {
+  async createShelf(name: string, type: ShelfType, userId: number): Promise<Shelf[]> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new ForbiddenException();
     }
 
     const newShelf = new Shelf(name, type, new Date(), new Date(), user);
-    return this.shelfRepository.save(newShelf);
+    await this.shelfRepository.save(newShelf);
+
+    return await this.shelfRepository.findShelvesByUser(user);
   }
 
   async removeShelf(userId: number, shelfId: number): Promise<Shelf> {

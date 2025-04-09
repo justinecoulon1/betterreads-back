@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { BookRepository } from '../../database/book/book.repository';
 import { Book } from '../../database/model/book.entity';
 import { IsbnService } from '../utils/isbn/isbn.service';
@@ -13,6 +13,8 @@ import { Author } from '../../database/model/author.entity';
 import { TransactionService } from '../../database/utils/transaction/transaction.service';
 import * as fs from 'node:fs';
 import { InvalidIsbnException } from '../utils/isbn/isbn.exceptions';
+import { ShelfRepository } from '../../database/shelf/shelf.repository';
+import { ShelfNotFoundException } from '../shelf/shelf.exceptions';
 
 @Injectable()
 export class BookService {
@@ -25,6 +27,7 @@ export class BookService {
     private readonly authorService: AuthorService,
     private readonly authorRepository: AuthorRepository,
     private readonly transactionService: TransactionService,
+    private readonly shelfRepository: ShelfRepository,
   ) {}
 
   getLatestBooks(): Promise<Book[]> {
@@ -163,5 +166,26 @@ export class BookService {
       throw new InvalidIsbnException();
     }
     return this.bookCoverService.getCoverStream(isbn.value);
+  }
+
+  async addBookToShelf(userId: number, rawIsbn: string, shelfId: number): Promise<Book> {
+    const isbn = this.isbnService.parseIsbn(rawIsbn);
+    if (isbn.type !== IsbnType.ISBN_13) {
+      throw new InvalidIsbnException();
+    }
+    const book = await this.getBookByIsbn(isbn);
+    if (!book) {
+      throw new BookNotFoundException();
+    }
+    const shelf = await this.shelfRepository.findById(shelfId);
+    if (!shelf) {
+      throw new ShelfNotFoundException();
+    }
+    if ((await shelf.user).id !== userId) {
+      throw new ForbiddenException();
+    }
+
+    book.shelves = Promise.resolve([...(await book.shelves), shelf]);
+    return this.bookRepository.save(book);
   }
 }

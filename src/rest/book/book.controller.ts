@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Res } from '@nestjs/common';
 import { BookService } from './book.service';
 import bookMapper from '../mapper/book.mapper';
 import { BookDto, BookListDto, CreateBookRequestDto, PreloadedBookInfoDto } from '../dto/book.dto';
@@ -42,5 +42,14 @@ export class BookController {
   getBookCoverImage(@Param('isbn') isbn: string, @Res() res: Response) {
     const fileStream = this.bookService.getBookCoverImageStream(isbn);
     fileStream.pipe(res);
+  }
+
+  @Post('/add/:userId/:bookIsbn/:shelfId')
+  async addBookToShelf(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('bookIsbn') bookIsbn: string,
+    @Param('shelfId', ParseIntPipe) shelfId: number,
+  ): Promise<BookDto> {
+    return bookMapper.toBookDto(await this.bookService.addBookToShelf(userId, bookIsbn, shelfId));
   }
 }

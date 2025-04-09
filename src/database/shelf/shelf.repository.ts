@@ -22,6 +22,14 @@ export class ShelfRepository {
     return this.repository.find({ where: { user } });
   }
 
+  findLatestShelvesByUser(user: User, amount: number): Promise<Shelf[]> {
+    return this.repository.find({
+      where: { user },
+      order: { createdAt: 'DESC' },
+      take: amount,
+    });
+  }
+
   save(shelf: Shelf): Promise<Shelf> {
     return this.repository.save(shelf);
   }
