@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BookRepository } from '../../database/book/book.repository';
 import { Book } from '../../database/model/book.entity';
 import { IsbnService } from '../utils/isbn/isbn.service';
@@ -15,6 +15,7 @@ import * as fs from 'node:fs';
 import { InvalidIsbnException } from '../utils/isbn/isbn.exceptions';
 import { ShelfRepository } from '../../database/shelf/shelf.repository';
 import { ShelfNotFoundException } from '../shelf/shelf.exceptions';
+import { ShelfType } from '../../database/model/shelf.entity';
 
 @Injectable()
 export class BookService {
@@ -170,24 +171,31 @@ export class BookService {
 
   async addBookToShelves(userId: number, rawIsbn: string, shelvesId: number[]): Promise<Book> {
     const isbn = this.isbnService.parseIsbn(rawIsbn);
-    if (isbn.type !== IsbnType.ISBN_13) {
-      throw new InvalidIsbnException();
-    }
     const book = await this.getBookByIsbn(isbn);
     if (!book) {
       throw new BookNotFoundException();
     }
-    const shelves = await this.shelfRepository.findAllById(shelvesId);
-    if (!shelves) {
+    const shelves = await this.shelfRepository.findByIdsAndUserId(shelvesId, userId);
+    if (!shelves.length) {
       throw new ShelfNotFoundException();
     }
-    shelves.map(async (shelf) => {
-      if ((await shelf.user).id !== userId) {
-        throw new ForbiddenException();
-      }
-    });
 
     book.shelves = Promise.resolve([...(await book.shelves), ...shelves]);
     return this.bookRepository.save(book);
+  }
+
+  async getBookReadingStatus(userId: number, bookId: number): Promise<ShelfType | undefined> {
+    const readingStatusShelves = await this.shelfRepository.findByBookIdUserIdAndTypeIn(bookId, userId, [
+      ShelfType.TO_READ,
+      ShelfType.READING,
+      ShelfType.READ,
+    ]);
+    if (readingStatusShelves.length === 0) {
+      return undefined;
+    }
+    if (readingStatusShelves.length > 1) {
+      console.warn(`User ${userId} has Book ${bookId} on multiple reading status shelves`);
+    }
+    return readingStatusShelves[0].type;
   }
 }

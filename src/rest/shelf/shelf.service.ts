@@ -11,12 +11,11 @@ export class ShelfService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async getUserShelves(id: number, amount?: number): Promise<Shelf[]> {
-    const user = await this.userRepository.findById(id);
+  async getUserShelves(userId: number, amount?: number): Promise<Shelf[]> {
     if (amount) {
-      return this.shelfRepository.findLatestShelvesByUser(user, amount);
+      return this.shelfRepository.findLatestShelvesByUserId(userId, amount);
     }
-    return this.shelfRepository.findShelvesByUser(user);
+    return this.shelfRepository.findShelvesByUserId(userId);
   }
 
   getAllShelves(): Promise<Shelf[]> {
@@ -45,7 +44,7 @@ export class ShelfService {
     const newShelf = new Shelf(name, type, new Date(), new Date(), user);
     await this.shelfRepository.save(newShelf);
 
-    return await this.shelfRepository.findShelvesByUser(user);
+    return await this.shelfRepository.findShelvesByUserId(userId);
   }
 
   async removeShelf(userId: number, shelfId: number): Promise<Shelf> {

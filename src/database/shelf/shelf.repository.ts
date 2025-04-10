@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DataSource, In, Repository } from 'typeorm';
-import { Shelf } from '../model/shelf.entity';
-import { User } from '../model/user.entity';
+import { Shelf, ShelfType } from '../model/shelf.entity';
 
 @Injectable()
 export class ShelfRepository {
@@ -18,13 +17,13 @@ export class ShelfRepository {
     return this.repository.find();
   }
 
-  findShelvesByUser(user: User): Promise<Shelf[]> {
-    return this.repository.find({ where: { user } });
+  findShelvesByUserId(userId: number): Promise<Shelf[]> {
+    return this.repository.find({ where: { user: { id: userId } } });
   }
 
-  findLatestShelvesByUser(user: User, amount: number): Promise<Shelf[]> {
+  findLatestShelvesByUserId(userId: number, amount: number): Promise<Shelf[]> {
     return this.repository.find({
-      where: { user },
+      where: { user: { id: userId } },
       order: { createdAt: 'DESC' },
       take: amount,
     });
@@ -49,9 +48,20 @@ export class ShelfRepository {
     });
   }
 
-  findAllById(id: number[]): Promise<Shelf[] | null> {
+  findByIdsAndUserId(id: number[], userId: number): Promise<Shelf[] | null> {
     return this.repository.find({
-      where: { id: In(id) },
+      where: { id: In(id), user: { id: userId } },
+      relations: { user: true },
+    });
+  }
+
+  findByBookIdUserIdAndTypeIn(bookId: number, userId: number, shelfTypes: ShelfType[]): Promise<Shelf[] | null> {
+    return this.repository.find({
+      where: {
+        books: { id: bookId },
+        user: { id: userId },
+        type: In(shelfTypes),
+      },
       relations: { user: true },
     });
   }

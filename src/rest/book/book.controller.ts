@@ -10,6 +10,7 @@ import {
 } from '../dto/book.dto';
 import { Response } from 'express';
 import { IsbnService } from '../utils/isbn/isbn.service';
+import { ShelfType } from '../../database/model/shelf.entity';
 
 @Controller('/books')
 export class BookController {
@@ -48,6 +49,14 @@ export class BookController {
   getBookCoverImage(@Param('isbn') isbn: string, @Res() res: Response) {
     const fileStream = this.bookService.getBookCoverImageStream(isbn);
     fileStream.pipe(res);
+  }
+
+  @Get('/status/:userId/:bookId')
+  getBookReadingStatus(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('bookId', ParseIntPipe) bookId: number,
+  ): Promise<ShelfType | undefined> {
+    return this.bookService.getBookReadingStatus(userId, bookId);
   }
 
   @Post('/add/:userId')
