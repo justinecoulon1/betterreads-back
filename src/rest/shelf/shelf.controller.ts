@@ -14,18 +14,23 @@ export class ShelfController {
   }
 
   @Get('/:userId')
-  async getUserShelves(@Param('userId') userId: number): Promise<SmallShelfDto[]> {
+  async getUserShelves(@Param('userId', ParseIntPipe) userId: number): Promise<SmallShelfDto[]> {
     return shelfMapper.toSmallDtos(await this.shelfService.getUserShelves(userId));
   }
 
+  @Get('/status-shelves/:userId')
+  async getUserReadingStatusShelves(@Param('userId', ParseIntPipe) userId: number): Promise<SmallShelfDto[]> {
+    return shelfMapper.toSmallDtos(await this.shelfService.getUserReadingStatusShelves(userId));
+  }
+
   @Get('/latest/:userId')
-  async getLastUserShelves(@Param('userId') userId: number): Promise<SmallShelfDto[]> {
+  async getLastUserShelves(@Param('userId', ParseIntPipe) userId: number): Promise<SmallShelfDto[]> {
     return shelfMapper.toSmallDtos(await this.shelfService.getUserShelves(userId, 5));
   }
 
   @Post('/:userId')
   async createShelf(
-    @Param('userId') userId: number,
+    @Param('userId', ParseIntPipe) userId: number,
     @Body() createShelfDto: CreateShelfRequestDto,
   ): Promise<SmallShelfDto[]> {
     return shelfMapper.toSmallDtos(await this.shelfService.createShelf(createShelfDto.name, ShelfType.USER, userId));

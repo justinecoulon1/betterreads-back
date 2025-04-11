@@ -55,6 +55,16 @@ export class ShelfRepository {
     });
   }
 
+  findByUserIdAndTypeIn(userId: number, shelfTypes: ShelfType[]): Promise<Shelf[] | null> {
+    return this.repository.find({
+      where: {
+        user: { id: userId },
+        type: In(shelfTypes),
+      },
+      relations: { user: true },
+    });
+  }
+
   findByBookIdUserIdAndTypeIn(bookId: number, userId: number, shelfTypes: ShelfType[]): Promise<Shelf[] | null> {
     return this.repository.find({
       where: {

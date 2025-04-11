@@ -18,6 +18,18 @@ export class ShelfService {
     return this.shelfRepository.findShelvesByUserId(userId);
   }
 
+  async getUserReadingStatusShelves(userId: number): Promise<Shelf[]> {
+    const shelves = await this.shelfRepository.findByUserIdAndTypeIn(userId, [
+      ShelfType.READING,
+      ShelfType.READ,
+      ShelfType.TO_READ,
+    ]);
+    if (shelves.length === 0) {
+      throw new ShelfNotFoundException();
+    }
+    return shelves;
+  }
+
   getAllShelves(): Promise<Shelf[]> {
     return this.shelfRepository.findAll();
   }

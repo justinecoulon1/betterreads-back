@@ -180,8 +180,13 @@ export class BookService {
       throw new ShelfNotFoundException();
     }
 
-    book.shelves = Promise.resolve([...(await book.shelves), ...shelves]);
-    return this.bookRepository.save(book);
+    return this.transactionService.wrapInTransaction(async () => {
+      shelves.forEach((shelf) => (shelf.updatedAt = new Date()));
+      await this.shelfRepository.saveAll(shelves);
+
+      book.shelves = Promise.resolve([...(await book.shelves), ...shelves]);
+      return this.bookRepository.save(book);
+    });
   }
 
   async getBookReadingStatus(userId: number, bookId: number): Promise<ShelfType | undefined> {
