@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Book } from '../model/book.entity';
+import { Shelf } from '../model/shelf.entity';
 
 @Injectable()
 export class BookRepository {
@@ -23,6 +24,16 @@ export class BookRepository {
       take: 15,
       relations: { authors: true },
     });
+  }
+
+  findLastBooksOfShelf(shelf: Shelf): Promise<Book[]> {
+    return this.repository
+      .createQueryBuilder('book')
+      .innerJoin('book.shelves', 'shelf')
+      .where('shelf.id = :shelfId', { shelfId: shelf.id })
+      .orderBy('book.id', 'DESC')
+      .limit(4)
+      .getMany();
   }
 
   findById(id: number): Promise<Book | null> {

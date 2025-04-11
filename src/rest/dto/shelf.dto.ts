@@ -1,5 +1,5 @@
 import { ShelfType } from '../../database/model/shelf.entity';
-import { BookDto } from './book.dto';
+import { BookDto, BookListDto } from './book.dto';
 
 export type SmallShelfDto = {
   id: number;
@@ -10,6 +10,10 @@ export type SmallShelfDto = {
 
 export type ShelfDto = SmallShelfDto & {
   books: BookDto[];
+};
+
+export type ShelfWithLastBookDto = SmallShelfDto & {
+  books: BookListDto[];
 };
 
 export type CreateShelfRequestDto = {

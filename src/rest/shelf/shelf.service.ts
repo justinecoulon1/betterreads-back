@@ -3,19 +3,39 @@ import { ShelfRepository } from '../../database/shelf/shelf.repository';
 import { Shelf, ShelfType } from '../../database/model/shelf.entity';
 import { UserRepository } from '../../database/user/user.repository';
 import { ShelfNotFoundException } from './shelf.exceptions';
+import { TransactionService } from '../../database/utils/transaction/transaction.service';
+import { BookRepository } from '../../database/book/book.repository';
 
 @Injectable()
 export class ShelfService {
   constructor(
     private readonly shelfRepository: ShelfRepository,
     private readonly userRepository: UserRepository,
+    private readonly bookRepository: BookRepository,
+    private readonly transactionService: TransactionService,
   ) {}
 
   async getUserShelves(userId: number, amount?: number): Promise<Shelf[]> {
     if (amount) {
-      return this.shelfRepository.findLatestShelvesByUserId(userId, amount);
+      return this.transactionService.wrapInTransaction(async () => {
+        const shelves = await this.shelfRepository.findLatestShelvesByUserId(userId, amount);
+        return await Promise.all(
+          shelves.map(async (shelf) => {
+            shelf.books = this.bookRepository.findLastBooksOfShelf(shelf);
+            return shelf;
+          }),
+        );
+      });
     }
-    return this.shelfRepository.findShelvesByUserId(userId);
+    return this.transactionService.wrapInTransaction(async () => {
+      const shelves = await this.shelfRepository.findShelvesByUserId(userId);
+      return await Promise.all(
+        shelves.map(async (shelf) => {
+          shelf.books = this.bookRepository.findLastBooksOfShelf(shelf);
+          return shelf;
+        }),
+      );
+    });
   }
 
   async getUserReadingStatusShelves(userId: number): Promise<Shelf[]> {

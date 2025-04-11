@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ShelfService } from './shelf.service';
 import shelfMapper from '../mapper/shelf.mapper';
-import { CreateShelfRequestDto, ShelfDto, SmallShelfDto } from '../dto/smallShelfDto';
+import { CreateShelfRequestDto, ShelfDto, ShelfWithLastBookDto, SmallShelfDto } from '../dto/shelf.dto';
 import { ShelfType } from '../../database/model/shelf.entity';
 
 @Controller('/shelves')
@@ -14,8 +14,8 @@ export class ShelfController {
   }
 
   @Get('/:userId')
-  async getUserShelves(@Param('userId', ParseIntPipe) userId: number): Promise<SmallShelfDto[]> {
-    return shelfMapper.toSmallDtos(await this.shelfService.getUserShelves(userId));
+  async getUserShelves(@Param('userId', ParseIntPipe) userId: number): Promise<ShelfWithLastBookDto[]> {
+    return shelfMapper.toShelfWithLastBooksDtos(await this.shelfService.getUserShelves(userId));
   }
 
   @Get('/status-shelves/:userId')
@@ -24,16 +24,18 @@ export class ShelfController {
   }
 
   @Get('/latest/:userId')
-  async getLastUserShelves(@Param('userId', ParseIntPipe) userId: number): Promise<SmallShelfDto[]> {
-    return shelfMapper.toSmallDtos(await this.shelfService.getUserShelves(userId, 5));
+  async getLastUserShelves(@Param('userId', ParseIntPipe) userId: number): Promise<ShelfWithLastBookDto[]> {
+    return shelfMapper.toShelfWithLastBooksDtos(await this.shelfService.getUserShelves(userId, 5));
   }
 
   @Post('/:userId')
   async createShelf(
     @Param('userId', ParseIntPipe) userId: number,
     @Body() createShelfDto: CreateShelfRequestDto,
-  ): Promise<SmallShelfDto[]> {
-    return shelfMapper.toSmallDtos(await this.shelfService.createShelf(createShelfDto.name, ShelfType.USER, userId));
+  ): Promise<ShelfWithLastBookDto[]> {
+    return shelfMapper.toShelfWithLastBooksDtos(
+      await this.shelfService.createShelf(createShelfDto.name, ShelfType.USER, userId),
+    );
   }
 
   @Get('/:userId/:shelfId')
