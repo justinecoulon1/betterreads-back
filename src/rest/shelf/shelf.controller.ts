@@ -19,8 +19,8 @@ export class ShelfController {
   }
 
   @Get('/status-shelves/:userId')
-  async getUserReadingStatusShelves(@Param('userId', ParseIntPipe) userId: number): Promise<SmallShelfDto[]> {
-    return shelfMapper.toSmallDtos(await this.shelfService.getUserReadingStatusShelves(userId));
+  async getUserReadingStatusShelves(@Param('userId', ParseIntPipe) userId: number): Promise<ShelfWithLastBookDto[]> {
+    return shelfMapper.toShelfWithLastBooksDtos(await this.shelfService.getUserReadingStatusShelves(userId));
   }
 
   @Get('/latest/:userId')

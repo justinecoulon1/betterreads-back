@@ -29,12 +29,6 @@ export class ShelfRepository {
     });
   }
 
-  getLastBooksOfShelves(shelves: Shelf[]): Promise<Shelf[]> {
-    return this.repository.find({
-      relations: { books: true },
-    });
-  }
-
   save(shelf: Shelf): Promise<Shelf> {
     return this.repository.save(shelf);
   }

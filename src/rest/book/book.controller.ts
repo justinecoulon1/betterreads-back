@@ -5,6 +5,7 @@ import {
   AddBookToShelvesRequestDto,
   BookDto,
   BookListDto,
+  ChangeBookReadingStatusRequestDto,
   CreateBookRequestDto,
   PreloadedBookInfoDto,
 } from '../dto/book.dto';
@@ -70,6 +71,18 @@ export class BookController {
         addBookToShelvesRequestDto.isbn,
         addBookToShelvesRequestDto.shelvesId,
       ),
+    );
+  }
+
+  @Post('/change-reading-status/:userId')
+  async changeBookReadingStatus(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() changeBookReadingStatusRequestDto: ChangeBookReadingStatusRequestDto,
+  ): Promise<ShelfType | undefined> {
+    return this.bookService.changeBookReadingStatus(
+      userId,
+      changeBookReadingStatusRequestDto.bookId,
+      changeBookReadingStatusRequestDto.statusType,
     );
   }
 }

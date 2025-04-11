@@ -32,7 +32,7 @@ export class BookRepository {
       .innerJoin('book.shelves', 'shelf')
       .where('shelf.id = :shelfId', { shelfId: shelf.id })
       .orderBy('book.id', 'DESC')
-      .limit(4)
+      .limit(3)
       .getMany();
   }
 
