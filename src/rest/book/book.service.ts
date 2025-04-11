@@ -182,7 +182,7 @@ export class BookService {
 
     return this.transactionService.wrapInTransaction(async () => {
       shelves.forEach((shelf) => {
-        if (shelf.type === ShelfType.TO_READ || ShelfType.READ || ShelfType.READING) {
+        if (shelf.type === ShelfType.TO_READ || shelf.type === ShelfType.READ || shelf.type === ShelfType.READING) {
           throw new ForbiddenException();
         }
         shelf.updatedAt = new Date();
