@@ -21,6 +21,16 @@ export class ShelfRepository {
     return this.repository.find({ where: { user: { id: userId } } });
   }
 
+  findShelvesContainingBookByUserId(bookId: number, userId: number): Promise<Shelf[]> {
+    return this.repository
+      .createQueryBuilder('shelf')
+      .innerJoin('shelf_book', 'sb', 'sb.shelf_id = shelf.id')
+      .innerJoin('book', 'book', 'book.id = sb.book_id')
+      .where('book.id = :bookId', { bookId })
+      .andWhere('shelf.app_user_id = :userId', { userId })
+      .getMany();
+  }
+
   findLatestShelvesByUserId(userId: number, amount: number): Promise<Shelf[]> {
     return this.repository.find({
       where: {
