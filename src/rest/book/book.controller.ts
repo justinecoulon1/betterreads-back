@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, Res } from '@nestjs/common';
 import { BookService } from './book.service';
 import bookMapper from '../mapper/book.mapper';
 import {
@@ -12,6 +12,8 @@ import {
 import { Response } from 'express';
 import { IsbnService } from '../utils/isbn/isbn.service';
 import { ShelfType } from '../../database/model/shelf.entity';
+import { BetterreadsRequest } from '../utils/http/betterreads-request';
+import { Role } from '../utils/roles/roles.decorator';
 
 @Controller('/books')
 export class BookController {
@@ -60,14 +62,15 @@ export class BookController {
     return this.bookService.getBookReadingStatus(userId, bookId);
   }
 
-  @Post('/add/:userId')
+  @Role('user')
+  @Post('/add')
   async addBookToShelves(
-    @Param('userId', ParseIntPipe) userId: number,
     @Body() addBookToShelvesRequestDto: AddBookToShelvesRequestDto,
+    @Req() req: BetterreadsRequest,
   ): Promise<BookDto> {
     return bookMapper.toBookDto(
       await this.bookService.addBookToShelves(
-        userId,
+        req.user.id,
         addBookToShelvesRequestDto.isbn,
         addBookToShelvesRequestDto.shelvesId,
       ),

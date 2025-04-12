@@ -17,4 +17,9 @@ export type LoginRequestDto = {
 export type LoginResponseDto = {
   user: UserDto;
   accessToken: string;
+  refreshToken: string;
+};
+
+export type RefreshRequestDto = {
+  refreshToken: string;
 };
