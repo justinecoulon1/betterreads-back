@@ -5,9 +5,9 @@ import {
   AddBookToShelvesRequestDto,
   BookDto,
   BookListDto,
-  ChangeBookReadingStatusRequestDto,
   CreateBookRequestDto,
   PreloadedBookInfoDto,
+  UpdateBookReadingStatusRequestDto,
 } from '../dto/book.dto';
 import { Response } from 'express';
 import { IsbnService } from '../utils/isbn/isbn.service';
@@ -74,15 +74,15 @@ export class BookController {
     );
   }
 
-  @Post('/change-reading-status/:userId')
-  async changeBookReadingStatus(
+  @Post('/update-reading-status/:userId')
+  async updateBookReadingStatus(
     @Param('userId', ParseIntPipe) userId: number,
-    @Body() changeBookReadingStatusRequestDto: ChangeBookReadingStatusRequestDto,
+    @Body() updateBookReadingStatusRequestDto: UpdateBookReadingStatusRequestDto,
   ): Promise<ShelfType | undefined> {
-    return this.bookService.changeBookReadingStatus(
+    return this.bookService.updateBookReadingStatus(
       userId,
-      changeBookReadingStatusRequestDto.bookId,
-      changeBookReadingStatusRequestDto.statusType,
+      updateBookReadingStatusRequestDto.bookId,
+      updateBookReadingStatusRequestDto.statusType,
     );
   }
 }

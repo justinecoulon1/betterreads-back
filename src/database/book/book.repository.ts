@@ -21,7 +21,7 @@ export class BookRepository {
   findLatest(): Promise<Book[]> {
     return this.repository.find({
       order: { createdAt: 'DESC' },
-      take: 15,
+      take: 20,
       relations: { authors: true },
     });
   }

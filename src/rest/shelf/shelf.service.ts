@@ -16,21 +16,12 @@ export class ShelfService {
   ) {}
 
   async getUserShelves(userId: number, amount?: number): Promise<Shelf[]> {
-    if (amount) {
-      return this.transactionService.wrapInTransaction(async () => {
-        const shelves = await this.shelfRepository.findLatestShelvesByUserId(userId, amount);
-        return await Promise.all(
-          shelves.map(async (shelf) => {
-            shelf.books = this.bookRepository.findLastBooksOfShelf(shelf);
-            return shelf;
-          }),
-        );
-      });
-    }
     return this.transactionService.wrapInTransaction(async () => {
-      const shelves = await this.shelfRepository.findShelvesByUserId(userId);
+      const shelves = amount
+        ? await this.shelfRepository.findLatestShelvesByUserId(userId, amount)
+        : await this.shelfRepository.findShelvesByUserId(userId);
       return await Promise.all(
-        shelves.map(async (shelf) => {
+        shelves.map((shelf) => {
           shelf.books = this.bookRepository.findLastBooksOfShelf(shelf);
           return shelf;
         }),
@@ -49,7 +40,7 @@ export class ShelfService {
         throw new ShelfNotFoundException();
       }
       return await Promise.all(
-        shelves.map(async (shelf) => {
+        shelves.map((shelf) => {
           shelf.books = this.bookRepository.findLastBooksOfShelf(shelf);
           return shelf;
         }),
@@ -91,7 +82,7 @@ export class ShelfService {
     if (!shelf) {
       throw new ShelfNotFoundException();
     }
-    if (shelf.type !== ShelfType.USER) {
+    if (shelf.type === ShelfType.TO_READ || shelf.type === ShelfType.READING || shelf.type === ShelfType.READ) {
       throw new ForbiddenException();
     }
     const shelfUserId = (await shelf.user).id;

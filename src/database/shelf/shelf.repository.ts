@@ -23,7 +23,10 @@ export class ShelfRepository {
 
   findLatestShelvesByUserId(userId: number, amount: number): Promise<Shelf[]> {
     return this.repository.find({
-      where: { user: { id: userId } },
+      where: {
+        user: { id: userId },
+        type: ShelfType.USER,
+      },
       order: { createdAt: 'DESC' },
       take: amount,
     });

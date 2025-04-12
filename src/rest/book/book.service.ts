@@ -209,7 +209,11 @@ export class BookService {
     return readingStatusShelves[0].type;
   }
 
-  async changeBookReadingStatus(userId: number, bookId: number, statusType: ShelfType): Promise<ShelfType | undefined> {
+  async updateBookReadingStatus(
+    userId: number,
+    bookId: number,
+    statusType: ShelfType | undefined,
+  ): Promise<ShelfType | undefined> {
     const book = await this.bookRepository.findById(bookId);
     if (!book) {
       throw new BookNotFoundException();
@@ -233,12 +237,6 @@ export class BookService {
         book.shelves = Promise.resolve([...currentShelves, newShelf]);
         const savedBook = await this.bookRepository.save(book);
         return this.getBookReadingStatus(userId, savedBook.id);
-      }
-
-      if (currentShelf && currentShelf.type === statusType) {
-        book.shelves = Promise.resolve(currentShelves.filter((shelf) => shelf.id !== currentShelf.id));
-        await this.bookRepository.save(book);
-        return undefined;
       }
 
       if (currentShelf && newShelf) {

@@ -62,7 +62,7 @@ export type AddBookToShelvesRequestDto = {
   shelvesId: number[];
 };
 
-export type ChangeBookReadingStatusRequestDto = {
+export type UpdateBookReadingStatusRequestDto = {
   bookId: number;
-  statusType: ShelfType;
+  statusType: ShelfType | undefined;
 };
