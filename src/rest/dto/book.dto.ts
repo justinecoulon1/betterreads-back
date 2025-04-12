@@ -1,4 +1,5 @@
 import { AuthorDto } from './author.dto';
+import { ShelfType } from '../../database/model/shelf.entity';
 
 export type BookListDto = {
   id: number;
@@ -54,4 +55,14 @@ export type IsbnDbBookResponseDto = {
     language?: string;
     publisher?: string;
   };
+};
+
+export type AddBookToShelvesRequestDto = {
+  isbn: string;
+  shelvesId: number[];
+};
+
+export type UpdateBookReadingStatusRequestDto = {
+  bookId: number;
+  statusType: ShelfType | undefined;
 };

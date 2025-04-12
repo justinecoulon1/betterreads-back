@@ -18,11 +18,11 @@ export class BookCoverService {
   getCoverStream(isbn13: string): fs.ReadStream {
     const imagePath = path.join(this.coversFolder, `${isbn13}.jpg`);
 
-    if (!fs.existsSync(imagePath)) {
-      return fs.createReadStream('./images/book.png');
+    if (fs.existsSync(imagePath)) {
+      return fs.createReadStream(imagePath);
     }
 
-    return fs.createReadStream(imagePath);
+    return fs.createReadStream('./images/book.png');
   }
 
   saveCover(isbn13: string, imageBuffer: Buffer): void {

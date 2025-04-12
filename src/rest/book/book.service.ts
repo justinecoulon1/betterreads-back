@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { BookRepository } from '../../database/book/book.repository';
 import { Book } from '../../database/model/book.entity';
 import { IsbnService } from '../utils/isbn/isbn.service';
@@ -13,6 +13,9 @@ import { Author } from '../../database/model/author.entity';
 import { TransactionService } from '../../database/utils/transaction/transaction.service';
 import * as fs from 'node:fs';
 import { InvalidIsbnException } from '../utils/isbn/isbn.exceptions';
+import { ShelfRepository } from '../../database/shelf/shelf.repository';
+import { ShelfNotFoundException } from '../shelf/shelf.exceptions';
+import { ShelfType } from '../../database/model/shelf.entity';
 
 @Injectable()
 export class BookService {
@@ -25,6 +28,7 @@ export class BookService {
     private readonly authorService: AuthorService,
     private readonly authorRepository: AuthorRepository,
     private readonly transactionService: TransactionService,
+    private readonly shelfRepository: ShelfRepository,
   ) {}
 
   getLatestBooks(): Promise<Book[]> {
@@ -162,10 +166,88 @@ export class BookService {
     if (isbn.type !== IsbnType.ISBN_13) {
       throw new InvalidIsbnException();
     }
-    const readStream = this.bookCoverService.getCoverStream(isbn.value);
-    if (!readStream) {
-      throw new NotFoundException();
+    return this.bookCoverService.getCoverStream(isbn.value);
+  }
+
+  async addBookToShelves(userId: number, rawIsbn: string, shelvesId: number[]): Promise<Book> {
+    const isbn = this.isbnService.parseIsbn(rawIsbn);
+    const book = await this.getBookByIsbn(isbn);
+    if (!book) {
+      throw new BookNotFoundException();
     }
-    return readStream;
+    const shelves = await this.shelfRepository.findByIdsAndUserId(shelvesId, userId);
+    if (!shelves.length) {
+      throw new ShelfNotFoundException();
+    }
+
+    return this.transactionService.wrapInTransaction(async () => {
+      shelves.forEach((shelf) => {
+        if (shelf.type === ShelfType.TO_READ || shelf.type === ShelfType.READ || shelf.type === ShelfType.READING) {
+          throw new ForbiddenException();
+        }
+        shelf.updatedAt = new Date();
+      });
+      await this.shelfRepository.saveAll(shelves);
+
+      book.shelves = Promise.resolve([...(await book.shelves), ...shelves]);
+      return this.bookRepository.save(book);
+    });
+  }
+
+  async getBookReadingStatus(userId: number, bookId: number): Promise<ShelfType | undefined> {
+    const readingStatusShelves = await this.shelfRepository.findByBookIdUserIdAndTypeIn(bookId, userId, [
+      ShelfType.TO_READ,
+      ShelfType.READING,
+      ShelfType.READ,
+    ]);
+    if (readingStatusShelves.length === 0) {
+      return undefined;
+    }
+    if (readingStatusShelves.length > 1) {
+      console.warn(`User ${userId} has Book ${bookId} on multiple reading status shelves`);
+    }
+    return readingStatusShelves[0].type;
+  }
+
+  async updateBookReadingStatus(
+    userId: number,
+    bookId: number,
+    statusType: ShelfType | undefined,
+  ): Promise<ShelfType | undefined> {
+    const book = await this.bookRepository.findById(bookId);
+    if (!book) {
+      throw new BookNotFoundException();
+    }
+
+    return this.transactionService.wrapInTransaction(async () => {
+      const readingShelfTypes = [ShelfType.TO_READ, ShelfType.READING, ShelfType.READ];
+
+      const [existingShelves, userShelves] = await Promise.all([
+        this.shelfRepository.findByBookIdUserIdAndTypeIn(bookId, userId, readingShelfTypes),
+        this.shelfRepository.findByUserIdAndTypeIn(userId, readingShelfTypes),
+      ]);
+
+      const currentShelf = existingShelves[0];
+      const newShelf = userShelves.find((shelf) => shelf.type === statusType);
+
+      const currentShelves = await book.shelves;
+
+      if (!currentShelf && newShelf) {
+        newShelf.updatedAt = new Date();
+        book.shelves = Promise.resolve([...currentShelves, newShelf]);
+        const savedBook = await this.bookRepository.save(book);
+        return this.getBookReadingStatus(userId, savedBook.id);
+      }
+
+      if (currentShelf && newShelf) {
+        newShelf.updatedAt = new Date();
+        const updatedShelves = currentShelves.filter((shelf) => shelf.id !== currentShelf.id);
+        book.shelves = Promise.resolve([...updatedShelves, newShelf]);
+        const savedBook = await this.bookRepository.save(book);
+        return this.getBookReadingStatus(userId, savedBook.id);
+      }
+
+      return undefined;
+    });
   }
 }
