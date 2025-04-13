@@ -2,11 +2,12 @@ import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, Res } from '@nes
 import { BookService } from './book.service';
 import bookMapper from '../mapper/book.mapper';
 import {
-  AddBookToShelvesRequestDto,
   BookDto,
   BookListDto,
   CreateBookRequestDto,
   PreloadedBookInfoDto,
+  UpdateBookInShelvesRequestDto,
+  UpdateBookInShelvesResponseDto,
   UpdateBookReadingStatusRequestDto,
 } from '../dto/book.dto';
 import { Response } from 'express';
@@ -14,6 +15,7 @@ import { IsbnService } from '../utils/isbn/isbn.service';
 import { ShelfType } from '../../database/model/shelf.entity';
 import { BetterreadsRequest } from '../utils/http/betterreads-request';
 import { Role } from '../utils/roles/roles.decorator';
+import shelfMapper from '../mapper/shelf.mapper';
 
 @Controller('/books')
 export class BookController {
@@ -66,21 +68,6 @@ export class BookController {
   }
 
   @Role('user')
-  @Post('/add')
-  async addBookToShelves(
-    @Body() addBookToShelvesRequestDto: AddBookToShelvesRequestDto,
-    @Req() req: BetterreadsRequest,
-  ): Promise<BookDto> {
-    return bookMapper.toBookDto(
-      await this.bookService.addBookToShelves(
-        req.user.id,
-        addBookToShelvesRequestDto.isbn,
-        addBookToShelvesRequestDto.shelvesId,
-      ),
-    );
-  }
-
-  @Role('user')
   @Post('/update-reading-status')
   async updateBookReadingStatus(
     @Req() req: BetterreadsRequest,
@@ -91,5 +78,24 @@ export class BookController {
       updateBookReadingStatusRequestDto.bookId,
       updateBookReadingStatusRequestDto.statusType,
     );
+  }
+
+  @Role('user')
+  @Post('/update-shelves')
+  async updateBookInShelves(
+    @Req() req: BetterreadsRequest,
+    @Body() updateBookInShelvesRequestDto: UpdateBookInShelvesRequestDto,
+  ): Promise<UpdateBookInShelvesResponseDto> {
+    const response = await this.bookService.updateBookInShelves(
+      req.user.id,
+      updateBookInShelvesRequestDto.bookId,
+      updateBookInShelvesRequestDto.shelvesToAddIds,
+      updateBookInShelvesRequestDto.shelvesToDeleteIds,
+    );
+    return {
+      isbn: response.book.isbn13,
+      addedShelves: shelfMapper.toSmallDtos(response.addedShelves),
+      removedShelves: shelfMapper.toSmallDtos(response.removedShelves),
+    };
   }
 }

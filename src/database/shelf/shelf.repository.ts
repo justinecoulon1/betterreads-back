@@ -18,7 +18,13 @@ export class ShelfRepository {
   }
 
   findShelvesByUserId(userId: number): Promise<Shelf[]> {
-    return this.repository.find({ where: { user: { id: userId } } });
+    return this.repository.find({
+      where: {
+        user: { id: userId },
+        type: ShelfType.USER,
+      },
+      order: { createdAt: 'DESC' },
+    });
   }
 
   findShelvesContainingBookByUserId(bookId: number, userId: number): Promise<Shelf[]> {
@@ -64,6 +70,17 @@ export class ShelfRepository {
   findByIdsAndUserId(id: number[], userId: number): Promise<Shelf[] | null> {
     return this.repository.find({
       where: { id: In(id), user: { id: userId } },
+      relations: { user: true },
+    });
+  }
+
+  findUserShelvesByIds(id: number[], userId: number): Promise<Shelf[] | null> {
+    return this.repository.find({
+      where: {
+        id: In(id),
+        user: { id: userId },
+        type: ShelfType.USER,
+      },
       relations: { user: true },
     });
   }

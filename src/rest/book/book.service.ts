@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { BookRepository } from '../../database/book/book.repository';
 import { Book } from '../../database/model/book.entity';
 import { IsbnService } from '../utils/isbn/isbn.service';
@@ -14,8 +14,8 @@ import { TransactionService } from '../../database/utils/transaction/transaction
 import * as fs from 'node:fs';
 import { InvalidIsbnException } from '../utils/isbn/isbn.exceptions';
 import { ShelfRepository } from '../../database/shelf/shelf.repository';
-import { ShelfNotFoundException } from '../shelf/shelf.exceptions';
-import { ShelfType } from '../../database/model/shelf.entity';
+import { Shelf, ShelfType } from '../../database/model/shelf.entity';
+import { UpdateBookInShelvesResponse } from './book.types';
 
 @Injectable()
 export class BookService {
@@ -169,31 +169,6 @@ export class BookService {
     return this.bookCoverService.getCoverStream(isbn.value);
   }
 
-  async addBookToShelves(userId: number, rawIsbn: string, shelvesId: number[]): Promise<Book> {
-    const isbn = this.isbnService.parseIsbn(rawIsbn);
-    const book = await this.getBookByIsbn(isbn);
-    if (!book) {
-      throw new BookNotFoundException();
-    }
-    const shelves = await this.shelfRepository.findByIdsAndUserId(shelvesId, userId);
-    if (!shelves.length) {
-      throw new ShelfNotFoundException();
-    }
-
-    return this.transactionService.wrapInTransaction(async () => {
-      shelves.forEach((shelf) => {
-        if (shelf.type === ShelfType.TO_READ || shelf.type === ShelfType.READ || shelf.type === ShelfType.READING) {
-          throw new ForbiddenException();
-        }
-        shelf.updatedAt = new Date();
-      });
-      await this.shelfRepository.saveAll(shelves);
-
-      book.shelves = Promise.resolve([...(await book.shelves), ...shelves]);
-      return this.bookRepository.save(book);
-    });
-  }
-
   async getBookReadingStatus(userId: number, bookId: number): Promise<ShelfType | undefined> {
     const readingStatusShelves = await this.shelfRepository.findByBookIdUserIdAndTypeIn(bookId, userId, [
       ShelfType.TO_READ,
@@ -249,5 +224,44 @@ export class BookService {
 
       return undefined;
     });
+  }
+
+  async updateBookInShelves(
+    userId: number,
+    bookId: number,
+    shelvesToAddIds: number[],
+    shelvesToDeleteIds: number[],
+  ): Promise<UpdateBookInShelvesResponse> {
+    const book = await this.getBookById(bookId);
+    if (!book) {
+      throw new BookNotFoundException();
+    }
+
+    const toAddShelves = await this.shelfRepository.findUserShelvesByIds(shelvesToAddIds, userId);
+    const toDeleteShelves = await this.shelfRepository.findUserShelvesByIds(shelvesToDeleteIds, userId);
+
+    return this.transactionService.wrapInTransaction(async () => {
+      const addedShelves = await this.addBookToShelves(toAddShelves, book);
+      const removedShelves = await this.removeBookFromShelves(toDeleteShelves, book);
+
+      return { book, addedShelves, removedShelves };
+    });
+  }
+
+  private async addBookToShelves(shelves: Shelf[], book: Book): Promise<Shelf[]> {
+    for (const shelf of shelves) {
+      (await shelf.books).push(book);
+      shelf.updatedAt = new Date();
+    }
+    return this.shelfRepository.saveAll(shelves);
+  }
+
+  private async removeBookFromShelves(shelves: Shelf[], book: Book): Promise<Shelf[]> {
+    for (const shelf of shelves) {
+      const updatedBooks = (await shelf.books).filter((b) => b.id !== book.id);
+      shelf.books = Promise.resolve(updatedBooks);
+      shelf.updatedAt = new Date();
+    }
+    return this.shelfRepository.saveAll(shelves);
   }
 }
