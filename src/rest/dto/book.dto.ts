@@ -1,5 +1,6 @@
 import { AuthorDto } from './author.dto';
 import { ShelfType } from '../../database/model/shelf.entity';
+import { SmallShelfDto } from './shelf.dto';
 
 export type BookListDto = {
   id: number;
@@ -57,9 +58,16 @@ export type IsbnDbBookResponseDto = {
   };
 };
 
-export type AddBookToShelvesRequestDto = {
+export type UpdateBookInShelvesRequestDto = {
+  bookId: number;
+  shelvesToAddIds: number[];
+  shelvesToDeleteIds: number[];
+};
+
+export type UpdateBookInShelvesResponseDto = {
   isbn: string;
-  shelvesId: number[];
+  addedShelves: SmallShelfDto[];
+  removedShelves: SmallShelfDto[];
 };
 
 export type UpdateBookReadingStatusRequestDto = {
