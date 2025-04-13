@@ -25,7 +25,7 @@ export class UserService {
       throw new ConflictException('Email address already in use');
     }
     const hashedPassword = await this.passwordService.hashPassword(password);
-    const newUser = new User(name, email, hashedPassword, new Date(), new Date());
+    const newUser = new User(name, email, hashedPassword, 'user', new Date(), new Date());
 
     return this.transactionService.wrapInTransaction(async () => {
       const user = await this.userRepository.save(newUser);

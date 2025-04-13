@@ -5,6 +5,7 @@ import { UserRepository } from '../../database/user/user.repository';
 import { ShelfNotFoundException } from './shelf.exceptions';
 import { TransactionService } from '../../database/utils/transaction/transaction.service';
 import { BookRepository } from '../../database/book/book.repository';
+import { User } from '../../database/model/user.entity';
 
 @Injectable()
 export class ShelfService {
@@ -27,6 +28,10 @@ export class ShelfService {
         }),
       );
     });
+  }
+
+  async getUserShelvesContainingBook(userId: number, bookId: number): Promise<Shelf[]> {
+    return this.shelfRepository.findShelvesContainingBookByUserId(bookId, userId);
   }
 
   async getUserReadingStatusShelves(userId: number): Promise<Shelf[]> {
@@ -65,16 +70,11 @@ export class ShelfService {
     return shelf;
   }
 
-  async createShelf(name: string, type: ShelfType, userId: number): Promise<Shelf[]> {
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new ForbiddenException();
-    }
-
+  async createShelf(name: string, type: ShelfType, user: User): Promise<Shelf[]> {
     const newShelf = new Shelf(name, type, new Date(), new Date(), user);
     await this.shelfRepository.save(newShelf);
 
-    return await this.shelfRepository.findShelvesByUserId(userId);
+    return this.shelfRepository.findShelvesByUserId(user.id);
   }
 
   async removeShelf(userId: number, shelfId: number): Promise<Shelf> {
@@ -90,6 +90,6 @@ export class ShelfService {
       throw new ForbiddenException();
     }
 
-    return await this.shelfRepository.remove(shelf);
+    return this.shelfRepository.remove(shelf);
   }
 }

@@ -2,6 +2,7 @@ import { IsEmail, Length } from 'class-validator';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Shelf } from './shelf.entity';
 import { Review } from './review.entity';
+import { BetterreadRole } from '../../rest/utils/roles/roles.decorator';
 
 @Entity('app_user')
 export class User {
@@ -19,6 +20,9 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ name: 'user_role' })
+  role: BetterreadRole;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
@@ -31,10 +35,11 @@ export class User {
   @OneToMany(() => Shelf, (shelf) => shelf.user)
   shelves: Promise<Shelf[]>;
 
-  constructor(name: string, email: string, password: string, createdAt: Date, updatedAt: Date) {
+  constructor(name: string, email: string, password: string, role: BetterreadRole, createdAt: Date, updatedAt: Date) {
     this.name = name;
     this.email = email;
     this.password = password;
+    this.role = role;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }

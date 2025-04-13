@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, Res } from '@nestjs/common';
 import { BookService } from './book.service';
 import bookMapper from '../mapper/book.mapper';
 import {
@@ -12,6 +12,8 @@ import {
 import { Response } from 'express';
 import { IsbnService } from '../utils/isbn/isbn.service';
 import { ShelfType } from '../../database/model/shelf.entity';
+import { BetterreadsRequest } from '../utils/http/betterreads-request';
+import { Role } from '../utils/roles/roles.decorator';
 
 @Controller('/books')
 export class BookController {
@@ -26,7 +28,7 @@ export class BookController {
   }
 
   @Get('/:id')
-  async getBookById(@Param('id') id: number): Promise<BookDto> {
+  async getBookById(@Param('id', ParseIntPipe) id: number): Promise<BookDto> {
     return bookMapper.toBookDto(await this.bookService.getBookById(id));
   }
 
@@ -36,11 +38,13 @@ export class BookController {
     return bookMapper.toBookDto(await this.bookService.getBookByIsbn(isbn));
   }
 
+  @Role('user')
   @Get('/preload/:isbn')
   async preloadBookInfo(@Param('isbn') isbn: string): Promise<PreloadedBookInfoDto> {
     return this.bookService.getPreloadedBookInfoDto(isbn);
   }
 
+  @Role('user')
   @Post('/')
   async createBook(@Body() createBookRequestDto: CreateBookRequestDto): Promise<BookDto> {
     return bookMapper.toBookDto(await this.bookService.createBook(createBookRequestDto));
@@ -52,35 +56,38 @@ export class BookController {
     fileStream.pipe(res);
   }
 
-  @Get('/status/:userId/:bookId')
+  @Role('user')
+  @Get('/status/:bookId')
   getBookReadingStatus(
-    @Param('userId', ParseIntPipe) userId: number,
     @Param('bookId', ParseIntPipe) bookId: number,
+    @Req() req: BetterreadsRequest,
   ): Promise<ShelfType | undefined> {
-    return this.bookService.getBookReadingStatus(userId, bookId);
+    return this.bookService.getBookReadingStatus(req.user.id, bookId);
   }
 
-  @Post('/add/:userId')
+  @Role('user')
+  @Post('/add')
   async addBookToShelves(
-    @Param('userId', ParseIntPipe) userId: number,
     @Body() addBookToShelvesRequestDto: AddBookToShelvesRequestDto,
+    @Req() req: BetterreadsRequest,
   ): Promise<BookDto> {
     return bookMapper.toBookDto(
       await this.bookService.addBookToShelves(
-        userId,
+        req.user.id,
         addBookToShelvesRequestDto.isbn,
         addBookToShelvesRequestDto.shelvesId,
       ),
     );
   }
 
-  @Post('/update-reading-status/:userId')
+  @Role('user')
+  @Post('/update-reading-status')
   async updateBookReadingStatus(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: BetterreadsRequest,
     @Body() updateBookReadingStatusRequestDto: UpdateBookReadingStatusRequestDto,
   ): Promise<ShelfType | undefined> {
     return this.bookService.updateBookReadingStatus(
-      userId,
+      req.user.id,
       updateBookReadingStatusRequestDto.bookId,
       updateBookReadingStatusRequestDto.statusType,
     );
