@@ -15,7 +15,7 @@ export class BookRepository {
   }
 
   findAll(): Promise<Book[]> {
-    return this.repository.find();
+    return this.repository.find({ relations: { authors: true } });
   }
 
   findLatest(): Promise<Book[]> {
