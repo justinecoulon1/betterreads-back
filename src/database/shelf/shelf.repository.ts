@@ -52,8 +52,8 @@ export class ShelfRepository {
     return this.repository.save(shelf);
   }
 
-  saveAll(shelf: Shelf[]): Promise<Shelf[]> {
-    return this.repository.save(shelf);
+  saveAll(shelves: Shelf[]): Promise<Shelf[]> {
+    return this.repository.save(shelves);
   }
 
   remove(shelf: Shelf): Promise<Shelf> {
