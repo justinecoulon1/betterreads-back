@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import authorMapper from '../../mapper/author.mapper';
 import { AuthorService } from './author.service';
-import { AuthorDto, CreateAuthorRequestDto } from '../../dto/author.dto';
+import { AuthorDto, AuthorWithBooksDto, CreateAuthorRequestDto } from '../../dto/author.dto';
 
 @Controller('/authors')
 export class AuthorController {
@@ -13,8 +13,8 @@ export class AuthorController {
   }
 
   @Get('/slug/:slug')
-  async getAuthorBySlug(@Param('slug') slug: string): Promise<AuthorDto> {
-    return authorMapper.toDto(await this.authorService.getAuthorBySlug(slug));
+  async getAuthorBySlug(@Param('slug') slug: string): Promise<AuthorWithBooksDto> {
+    return authorMapper.toAuthorWithBooksDto(await this.authorService.getAuthorBySlug(slug));
   }
 
   @Post()

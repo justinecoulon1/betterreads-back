@@ -35,15 +35,15 @@ export class AuthorRepository {
     });
   }
 
+  findBySlugs(slugs: string[]): Promise<Author[]> {
+    return this.repository.findBy({ slug: In(slugs) });
+  }
+
   save(author: Author): Promise<Author> {
     return this.repository.save(author);
   }
 
   saveAll(authors: Author[]): Promise<Author[]> {
     return this.repository.save(authors);
-  }
-
-  findBySlugs(slugs: string[]): Promise<Author[]> {
-    return this.repository.findBy({ slug: In(slugs) });
   }
 }
