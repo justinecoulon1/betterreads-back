@@ -17,6 +17,9 @@ import { ShelfRepository } from '../../../database/shelf/shelf.repository';
 import { Shelf, ShelfType } from '../../../database/model/shelf.entity';
 import { UpdateBookInShelvesResponse } from './book.types';
 import { SearchService } from '../search/search.service';
+import { HistoryRepository } from '../../../database/history/history.repository';
+import { User } from '../../../database/model/user.entity';
+import { History, HistoryStatus } from '../../../database/model/history.entity';
 
 @Injectable()
 export class BookService {
@@ -31,6 +34,7 @@ export class BookService {
     private readonly transactionService: TransactionService,
     private readonly shelfRepository: ShelfRepository,
     private readonly searchService: SearchService,
+    private readonly historyRepository: HistoryRepository,
   ) {}
 
   getLatestBooks(): Promise<Book[]> {
@@ -194,7 +198,7 @@ export class BookService {
   }
 
   async updateBookReadingStatus(
-    userId: number,
+    user: User,
     bookId: number,
     statusType: ShelfType | undefined,
   ): Promise<ShelfType | undefined> {
@@ -207,28 +211,39 @@ export class BookService {
       const readingShelfTypes = [ShelfType.TO_READ, ShelfType.READING, ShelfType.READ];
 
       const [existingShelves, userShelves] = await Promise.all([
-        this.shelfRepository.findByBookIdUserIdAndTypeIn(bookId, userId, readingShelfTypes),
-        this.shelfRepository.findByUserIdAndTypeIn(userId, readingShelfTypes),
+        this.shelfRepository.findByBookIdUserIdAndTypeIn(bookId, user.id, readingShelfTypes),
+        this.shelfRepository.findByUserIdAndTypeIn(user.id, readingShelfTypes),
       ]);
 
       const currentShelf = existingShelves[0];
       const newShelf = userShelves.find((shelf) => shelf.type === statusType);
 
-      const currentShelves = await book.shelves;
-
-      if (!currentShelf && newShelf) {
-        newShelf.updatedAt = new Date();
-        book.shelves = Promise.resolve([...currentShelves, newShelf]);
-        const savedBook = await this.bookRepository.save(book);
-        return this.getBookReadingStatus(userId, savedBook.id);
+      if (currentShelf && (!newShelf || currentShelf.id !== newShelf.id)) {
+        const currentShelfBooks = await currentShelf.books;
+        currentShelf.books = Promise.resolve(currentShelfBooks.filter((b) => b.id !== book.id));
+        currentShelf.updatedAt = new Date();
+        await this.shelfRepository.save(currentShelf);
       }
 
-      if (currentShelf && newShelf) {
-        newShelf.updatedAt = new Date();
-        const updatedShelves = currentShelves.filter((shelf) => shelf.id !== currentShelf.id);
-        book.shelves = Promise.resolve([...updatedShelves, newShelf]);
-        const savedBook = await this.bookRepository.save(book);
-        return this.getBookReadingStatus(userId, savedBook.id);
+      if (newShelf) {
+        const newShelfBooks = await newShelf.books;
+        const isAlreadyAdded = newShelfBooks.some((b) => b.id === book.id);
+        if (!isAlreadyAdded) {
+          newShelf.books = Promise.resolve([...newShelfBooks, book]);
+          newShelf.updatedAt = new Date();
+          await this.shelfRepository.save(newShelf);
+        }
+        const historyEntry = new History(
+          new Date(),
+          currentShelf ? HistoryStatus[currentShelf.type as keyof typeof HistoryStatus] : null,
+          HistoryStatus[newShelf.type as keyof typeof HistoryStatus],
+          user,
+          book,
+        );
+
+        await this.historyRepository.save(historyEntry);
+
+        return newShelf.type;
       }
 
       return undefined;

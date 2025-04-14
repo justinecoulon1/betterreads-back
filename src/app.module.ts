@@ -9,6 +9,7 @@ import { UserRepositoryModule } from './database/user/user.repository.module';
 import { AuthModule } from './rest/utils/auth/auth.module';
 import { RolesGuard } from './rest/utils/roles/roles.guard';
 import { SearchModule } from './rest/modules/search/search.module';
+import { HistoryModule } from './rest/modules/history/history.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SearchModule } from './rest/modules/search/search.module';
     UserRepositoryModule,
     AuthModule,
     SearchModule,
+    HistoryModule,
   ],
   controllers: [],
   providers: [

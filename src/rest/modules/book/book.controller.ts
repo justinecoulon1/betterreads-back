@@ -74,7 +74,7 @@ export class BookController {
     @Body() updateBookReadingStatusRequestDto: UpdateBookReadingStatusRequestDto,
   ): Promise<ShelfType | undefined> {
     return this.bookService.updateBookReadingStatus(
-      req.user.id,
+      req.user,
       updateBookReadingStatusRequestDto.bookId,
       updateBookReadingStatusRequestDto.statusType,
     );

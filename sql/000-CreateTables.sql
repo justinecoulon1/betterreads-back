@@ -62,12 +62,14 @@ CREATE TABLE Review (
                         CONSTRAINT FK_Review_app_user foreign key (app_user_id) references app_user (app_user_id)
 );
 
+CREATE TYPE history_status AS ENUM ('TO_READ', 'READING', 'READ');
 CREATE TABLE History (
                          history_id bigint GENERATED ALWAYS AS IDENTITY,
                          app_user_id bigint NOT NULL,
                          book_id bigint NOT NULL,
+                         old_status history_status,
+                         new_status history_status NOT NULL,
                          created_at timestamp NOT NULL,
-                         updated_at timestamp NOT NULL,
 
                          CONSTRAINT PK_history PRIMARY KEY (history_id),
                          CONSTRAINT FK_History_app_user foreign key (app_user_id) references app_user (app_user_id),

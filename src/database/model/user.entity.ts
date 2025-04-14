@@ -3,6 +3,7 @@ import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Up
 import { Shelf } from './shelf.entity';
 import { Review } from './review.entity';
 import { BetterreadRole } from '../../rest/utils/roles/roles.decorator';
+import { History } from './history.entity';
 
 @Entity('app_user')
 export class User {
@@ -34,6 +35,9 @@ export class User {
 
   @OneToMany(() => Shelf, (shelf) => shelf.user)
   shelves: Promise<Shelf[]>;
+
+  @OneToMany(() => History, (history) => history.user)
+  history: Promise<History[]>;
 
   constructor(name: string, email: string, password: string, role: BetterreadRole, createdAt: Date, updatedAt: Date) {
     this.name = name;

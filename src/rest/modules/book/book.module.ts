@@ -9,6 +9,7 @@ import { AuthorRepositoryModule } from '../../../database/author/author.reposito
 import { TransactionServiceModule } from '../../../database/utils/transaction/transaction.service.module';
 import { ShelfRepositoryModule } from '../../../database/shelf/shelf.repository.module';
 import { SearchModule } from '../search/search.module';
+import { HistoryRepositoryModule } from '../../../database/history/history.repository.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SearchModule } from '../search/search.module';
     TransactionServiceModule,
     ShelfRepositoryModule,
     SearchModule,
+    HistoryRepositoryModule,
   ],
   controllers: [BookController],
   providers: [BookService, BookCoverService],

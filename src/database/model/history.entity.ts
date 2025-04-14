@@ -1,6 +1,12 @@
-import { CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Book } from './book.entity';
+
+export enum HistoryStatus {
+  'READ' = 'READ',
+  'TO_READ' = 'TO_READ',
+  'READING' = 'READING',
+}
 
 @Entity()
 export class History {
@@ -10,8 +16,11 @@ export class History {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @Column({ name: 'old_status' })
+  oldStatus: HistoryStatus;
+
+  @Column({ name: 'new_status' })
+  newStatus: HistoryStatus;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'app_user_id' })
@@ -21,10 +30,15 @@ export class History {
   @JoinColumn({ name: 'book_id' })
   book: Promise<Book>;
 
-  constructor(createdAt: Date, updatedAt: Date, user: User, book: Book) {
+  constructor(createdAt: Date, oldStatus: HistoryStatus, newStatus: HistoryStatus, user: User, book: Book) {
     this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-    this.user = Promise.resolve(user);
-    this.book = Promise.resolve(book);
+    this.oldStatus = oldStatus;
+    this.newStatus = newStatus;
+    if (user) {
+      this.user = Promise.resolve(user);
+    }
+    if (book) {
+      this.book = Promise.resolve(book);
+    }
   }
 }
