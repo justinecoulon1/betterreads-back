@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import authorMapper from '../mapper/author.mapper';
+import authorMapper from '../../mapper/author.mapper';
 import { AuthorService } from './author.service';
-import { AuthorDto, CreateAuthorRequestDto } from '../dto/author.dto';
+import { AuthorDto, CreateAuthorRequestDto } from '../../dto/author.dto';
 
 @Controller('/authors')
 export class AuthorController {

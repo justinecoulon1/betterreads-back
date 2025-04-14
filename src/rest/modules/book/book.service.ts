@@ -1,21 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { BookRepository } from '../../database/book/book.repository';
-import { Book } from '../../database/model/book.entity';
-import { IsbnService } from '../utils/isbn/isbn.service';
-import { Isbn, IsbnType } from '../utils/isbn/isbn.types';
+import { BookRepository } from '../../../database/book/book.repository';
+import { Book } from '../../../database/model/book.entity';
+import { IsbnService } from '../../utils/isbn/isbn.service';
+import { Isbn, IsbnType } from '../../utils/isbn/isbn.types';
 import { BookAlreadyExistsException, BookNotFoundException } from './book.exceptions';
-import { CreateBookRequestDto, IsbnDbBookResponseDto, PreloadedBookInfoDto } from '../dto/book.dto';
+import { CreateBookRequestDto, IsbnDbBookResponseDto, PreloadedBookInfoDto } from '../../dto/book.dto';
 import axios from 'axios';
 import { BookCoverService } from './book-cover.service';
 import { AuthorService } from '../author/author.service';
-import { AuthorRepository } from '../../database/author/author.repository';
-import { Author } from '../../database/model/author.entity';
-import { TransactionService } from '../../database/utils/transaction/transaction.service';
+import { AuthorRepository } from '../../../database/author/author.repository';
+import { Author } from '../../../database/model/author.entity';
+import { TransactionService } from '../../../database/utils/transaction/transaction.service';
 import * as fs from 'node:fs';
-import { InvalidIsbnException } from '../utils/isbn/isbn.exceptions';
-import { ShelfRepository } from '../../database/shelf/shelf.repository';
-import { Shelf, ShelfType } from '../../database/model/shelf.entity';
+import { InvalidIsbnException } from '../../utils/isbn/isbn.exceptions';
+import { ShelfRepository } from '../../../database/shelf/shelf.repository';
+import { Shelf, ShelfType } from '../../../database/model/shelf.entity';
 import { UpdateBookInShelvesResponse } from './book.types';
+import { SearchService } from '../search/search.service';
 
 @Injectable()
 export class BookService {
@@ -29,6 +30,7 @@ export class BookService {
     private readonly authorRepository: AuthorRepository,
     private readonly transactionService: TransactionService,
     private readonly shelfRepository: ShelfRepository,
+    private readonly searchService: SearchService,
   ) {}
 
   getLatestBooks(): Promise<Book[]> {
@@ -90,10 +92,10 @@ export class BookService {
         new Author(toCreateAuthorName, authorSlugByName[toCreateAuthorName], new Date(), new Date()),
     );
 
-    const bookAuthors = [...toCreateAuthors, ...existingAuthors];
-
     return this.transactionService.wrapInTransaction(async () => {
-      const savedBookAuthors = await this.authorRepository.saveAll(bookAuthors);
+      const createdAuthors = await this.authorRepository.saveAll(toCreateAuthors);
+      await this.searchService.createAuthorsSearchData(createdAuthors);
+      const bookAuthors = [...createdAuthors, ...existingAuthors];
 
       const book = new Book(
         title,
@@ -107,8 +109,10 @@ export class BookService {
         new Date(),
         description,
       );
-      book.authors = Promise.resolve(savedBookAuthors);
-      return this.bookRepository.save(book);
+      book.authors = Promise.resolve(bookAuthors);
+      const createdBook = await this.bookRepository.save(book);
+      await this.searchService.createBookSearchData(createdBook);
+      return createdBook;
     });
   }
 
@@ -150,13 +154,18 @@ export class BookService {
       this.bookCoverService.saveCover(isbn.value, newImageData);
     }
     return {
-      description: isbnDbBookDto.synopsis?.replace(/<br>/g, '\n')?.replace(/<br\/>/g, '\n'),
+      description: isbnDbBookDto.synopsis
+        ?.replace(/<br>/g, '\n')
+        ?.replace(/<br\/>/g, '\n')
+        ?.replace(/<[a-zA-Z]+>/g, '')
+        ?.replace(/<\/[a-zA-Z]+>/g, ''),
       editor: isbnDbBookDto.publisher,
       editionLanguage: isbnDbBookDto.language,
       releaseDate: isbnDbBookDto.date_published,
       pages: isbnDbBookDto.pages,
       title: isbnDbBookDto.title,
       authorNames: isbnDbBookDto.authors,
+      genres: isbnDbBookDto.subjects,
       isbn13: isbn.value,
     };
   }

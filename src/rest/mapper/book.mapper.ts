@@ -1,9 +1,9 @@
-import { BookDto, BookListDto } from '../dto/book.dto';
+import { BookDto, SmallBookDto } from '../dto/book.dto';
 import { Book } from '../../database/model/book.entity';
 import authorMapper from './author.mapper';
 
 class BookMapper {
-  async toBookListDto(entity: Book): Promise<BookListDto> {
+  async toSmallBookDto(entity: Book): Promise<SmallBookDto> {
     return {
       id: entity.id,
       title: entity.title,
@@ -12,8 +12,8 @@ class BookMapper {
     };
   }
 
-  toBookListDtos(entities: Book[]): Promise<BookListDto[]> {
-    return Promise.all(entities.map((entity) => this.toBookListDto(entity)));
+  toSmallBookDtos(entities: Book[]): Promise<SmallBookDto[]> {
+    return Promise.all(entities.map((entity) => this.toSmallBookDto(entity)));
   }
 
   async toBookDto(entity: Book): Promise<BookDto> {

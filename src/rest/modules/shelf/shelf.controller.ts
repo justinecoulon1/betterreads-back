@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
 import { ShelfService } from './shelf.service';
-import shelfMapper from '../mapper/shelf.mapper';
-import { CreateShelfRequestDto, ShelfDto, ShelfWithLastBookDto, SmallShelfDto } from '../dto/shelf.dto';
-import { ShelfType } from '../../database/model/shelf.entity';
-import { Role } from '../utils/roles/roles.decorator';
-import { BetterreadsRequest } from '../utils/http/betterreads-request';
+import shelfMapper from '../../mapper/shelf.mapper';
+import { CreateShelfRequestDto, ShelfDto, ShelfWithLastBookDto, SmallShelfDto } from '../../dto/shelf.dto';
+import { ShelfType } from '../../../database/model/shelf.entity';
+import { Role } from '../../utils/roles/roles.decorator';
+import { BetterreadsRequest } from '../../utils/http/betterreads-request';
 
 @Controller('/shelves')
 export class ShelfController {

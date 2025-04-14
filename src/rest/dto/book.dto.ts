@@ -2,7 +2,7 @@ import { AuthorDto } from './author.dto';
 import { ShelfType } from '../../database/model/shelf.entity';
 import { SmallShelfDto } from './shelf.dto';
 
-export type BookListDto = {
+export type SmallBookDto = {
   id: number;
   title: string;
   isbn13: string;
@@ -42,6 +42,7 @@ export type PreloadedBookInfoDto = {
   authorNames?: string[];
   title?: string;
   editionLanguage?: string;
+  genres?: string[];
   editor?: string;
 };
 
@@ -52,6 +53,7 @@ export type IsbnDbBookResponseDto = {
     image?: string;
     date_published?: string;
     authors?: string[];
+    subjects?: string[];
     title?: string;
     language?: string;
     publisher?: string;

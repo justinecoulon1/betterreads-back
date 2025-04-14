@@ -31,7 +31,7 @@ class ShelfMapper {
   async toShelfWithLastBooksDto(entity: Shelf): Promise<ShelfWithLastBookDto> {
     return {
       ...this.toSmallDto(entity),
-      books: await bookMapper.toBookListDtos(await entity.books),
+      books: await bookMapper.toSmallBookDtos(await entity.books),
     };
   }
 

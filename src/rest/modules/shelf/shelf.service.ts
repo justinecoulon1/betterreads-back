@@ -1,11 +1,11 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { ShelfRepository } from '../../database/shelf/shelf.repository';
-import { Shelf, ShelfType } from '../../database/model/shelf.entity';
-import { UserRepository } from '../../database/user/user.repository';
+import { ShelfRepository } from '../../../database/shelf/shelf.repository';
+import { Shelf, ShelfType } from '../../../database/model/shelf.entity';
+import { UserRepository } from '../../../database/user/user.repository';
 import { ShelfNotFoundException } from './shelf.exceptions';
-import { TransactionService } from '../../database/utils/transaction/transaction.service';
-import { BookRepository } from '../../database/book/book.repository';
-import { User } from '../../database/model/user.entity';
+import { TransactionService } from '../../../database/utils/transaction/transaction.service';
+import { BookRepository } from '../../../database/book/book.repository';
+import { User } from '../../../database/model/user.entity';
 
 @Injectable()
 export class ShelfService {

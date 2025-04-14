@@ -1,21 +1,21 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Req, Res } from '@nestjs/common';
 import { BookService } from './book.service';
-import bookMapper from '../mapper/book.mapper';
+import bookMapper from '../../mapper/book.mapper';
 import {
   BookDto,
-  BookListDto,
   CreateBookRequestDto,
   PreloadedBookInfoDto,
+  SmallBookDto,
   UpdateBookInShelvesRequestDto,
   UpdateBookInShelvesResponseDto,
   UpdateBookReadingStatusRequestDto,
-} from '../dto/book.dto';
+} from '../../dto/book.dto';
 import { Response } from 'express';
-import { IsbnService } from '../utils/isbn/isbn.service';
-import { ShelfType } from '../../database/model/shelf.entity';
-import { BetterreadsRequest } from '../utils/http/betterreads-request';
-import { Role } from '../utils/roles/roles.decorator';
-import shelfMapper from '../mapper/shelf.mapper';
+import { IsbnService } from '../../utils/isbn/isbn.service';
+import { ShelfType } from '../../../database/model/shelf.entity';
+import { BetterreadsRequest } from '../../utils/http/betterreads-request';
+import { Role } from '../../utils/roles/roles.decorator';
+import shelfMapper from '../../mapper/shelf.mapper';
 
 @Controller('/books')
 export class BookController {
@@ -25,8 +25,8 @@ export class BookController {
   ) {}
 
   @Get('/latest')
-  async getLatestBooks(): Promise<BookListDto[]> {
-    return bookMapper.toBookListDtos(await this.bookService.getLatestBooks());
+  async getLatestBooks(): Promise<SmallBookDto[]> {
+    return bookMapper.toSmallBookDtos(await this.bookService.getLatestBooks());
   }
 
   @Get('/:id')

@@ -1,10 +1,10 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { UserRepository } from '../../database/user/user.repository';
-import { User } from '../../database/model/user.entity';
-import { PasswordService } from '../utils/auth/password.service';
-import { TransactionService } from '../../database/utils/transaction/transaction.service';
-import { Shelf, ShelfType } from '../../database/model/shelf.entity';
-import { ShelfRepository } from '../../database/shelf/shelf.repository';
+import { UserRepository } from '../../../database/user/user.repository';
+import { User } from '../../../database/model/user.entity';
+import { PasswordService } from '../../utils/auth/password.service';
+import { TransactionService } from '../../../database/utils/transaction/transaction.service';
+import { Shelf, ShelfType } from '../../../database/model/shelf.entity';
+import { ShelfRepository } from '../../../database/shelf/shelf.repository';
 
 @Injectable()
 export class UserService {

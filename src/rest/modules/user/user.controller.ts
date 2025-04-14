@@ -1,8 +1,14 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { CreateUserRequestDto, LoginRequestDto, LoginResponseDto, RefreshRequestDto, UserDto } from '../dto/user.dto';
-import userMapper from '../mapper/user.mapper';
+import {
+  CreateUserRequestDto,
+  LoginRequestDto,
+  LoginResponseDto,
+  RefreshRequestDto,
+  UserDto,
+} from '../../dto/user.dto';
+import userMapper from '../../mapper/user.mapper';
 import { UserService } from './user.service';
-import { TokenService } from '../utils/auth/token.service';
+import { TokenService } from '../../utils/auth/token.service';
 
 @Controller('/users')
 export class UserController {

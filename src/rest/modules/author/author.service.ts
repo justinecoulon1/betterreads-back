@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { AuthorRepository } from '../../database/author/author.repository';
-import { Author } from '../../database/model/author.entity';
+import { AuthorRepository } from '../../../database/author/author.repository';
+import { Author } from '../../../database/model/author.entity';
 import { kebabCase } from 'lodash';
 import { AuthorNotFoundException } from './author.exceptions';
 
