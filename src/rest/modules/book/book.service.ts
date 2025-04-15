@@ -223,6 +223,16 @@ export class BookService {
         currentShelf.books = Promise.resolve(currentShelfBooks.filter((b) => b.id !== book.id));
         currentShelf.updatedAt = new Date();
         await this.shelfRepository.save(currentShelf);
+
+        const historyEntry = new History(
+          new Date(),
+          currentShelf ? HistoryStatus[currentShelf.type as keyof typeof HistoryStatus] : null,
+          newShelf ? HistoryStatus[newShelf.type as keyof typeof HistoryStatus] : null,
+          user,
+          book,
+        );
+
+        await this.historyRepository.save(historyEntry);
       }
 
       if (newShelf) {
@@ -233,6 +243,7 @@ export class BookService {
           newShelf.updatedAt = new Date();
           await this.shelfRepository.save(newShelf);
         }
+
         const historyEntry = new History(
           new Date(),
           currentShelf ? HistoryStatus[currentShelf.type as keyof typeof HistoryStatus] : null,
