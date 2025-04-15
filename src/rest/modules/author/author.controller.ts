@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import authorMapper from '../../mapper/author.mapper';
 import { AuthorService } from './author.service';
 import { AuthorDto, AuthorWithBooksDto, CreateAuthorRequestDto } from '../../dto/author.dto';
@@ -8,7 +8,7 @@ export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}
 
   @Get('/:id')
-  async getAuthorById(@Param('id') id: number): Promise<AuthorDto> {
+  async getAuthorById(@Param('id', ParseIntPipe) id: number): Promise<AuthorDto> {
     return authorMapper.toDto(await this.authorService.getAuthorById(id));
   }
 

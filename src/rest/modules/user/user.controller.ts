@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import {
   CreateUserRequestDto,
   LoginRequestDto,
@@ -34,7 +34,7 @@ export class UserController {
   }
 
   @Get('/:id')
-  async getUserById(@Param('id') id: number): Promise<UserDto> {
+  async getUserById(@Param('id', ParseIntPipe) id: number): Promise<UserDto> {
     return userMapper.toDto(await this.userService.getUserById(id));
   }
 
