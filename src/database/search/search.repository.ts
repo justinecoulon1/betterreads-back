@@ -24,6 +24,8 @@ export class SearchRepository {
     const [searchItems, count] = await this.repository
       .createQueryBuilder('s')
       .innerJoin('(' + SEARCH_QUERY + ')', 'similarity_data', 'similarity_data.search_id = s.id')
+      .leftJoinAndSelect('s.book', 'book')
+      .leftJoinAndSelect('s.author', 'author')
       .setParameters(queryParameters)
       .orderBy('similarity', 'DESC')
       .limit(limit)
