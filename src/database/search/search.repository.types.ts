@@ -1,4 +1,4 @@
-import { Search } from '../../../database/model/search.entity';
+import { Search } from '../model/search.entity';
 
 export type SearchResult = {
   items: Search[];

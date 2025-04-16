@@ -5,7 +5,7 @@ import { AuthorRepository } from '../../../database/author/author.repository';
 import { Search, SearchType } from '../../../database/model/search.entity';
 import { Book } from '../../../database/model/book.entity';
 import { Author } from '../../../database/model/author.entity';
-import { SearchResult } from './search.types';
+import { SearchResult } from '../../../database/search/search.repository.types';
 
 @Injectable()
 export class SearchService {
@@ -19,11 +19,7 @@ export class SearchService {
     if (!text || text.length < 2) {
       return { count: 0, items: [] };
     }
-    const searchResult = await this.searchRepository.searchByText(text, limit, offset);
-    return {
-      count: searchResult.count,
-      items: searchResult.searchItems,
-    };
+    return this.searchRepository.searchByText(text, limit, offset);
   }
 
   createAuthorsSearchData(authors: Author[]): Promise<Search[]> {

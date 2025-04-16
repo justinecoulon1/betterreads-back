@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Search } from '../model/search.entity';
+import { SearchResult } from './search.repository.types';
+import { SEARCH_QUERY } from './search.repository.queries';
 
 @Injectable()
 export class SearchRepository {
@@ -17,20 +19,17 @@ export class SearchRepository {
     return this.repository.find();
   }
 
-  async searchByText(text: string, limit: number, offset: number) {
+  async searchByText(text: string, limit: number, offset: number): Promise<SearchResult> {
+    const queryParameters = { text, wildCardText: `%${text}%` };
     const [searchItems, count] = await this.repository
-      .createQueryBuilder('search')
-      .leftJoinAndSelect('search.book', 'book')
-      .leftJoinAndSelect('search.author', 'author')
-      .where('text ILIKE :wildcardText OR word_similarity(search.text, :text) > 0.15', {
-        wildcardText: `%${text}%`,
-        text,
-      })
-      .orderBy('word_similarity(search.text, :text)', 'DESC')
+      .createQueryBuilder('s')
+      .innerJoin('(' + SEARCH_QUERY + ')', 'similarity_data', 'similarity_data.search_id = s.id')
+      .setParameters(queryParameters)
+      .orderBy('similarity', 'DESC')
       .limit(limit)
       .offset(offset)
       .getManyAndCount();
-    return { searchItems, count };
+    return { items: searchItems, count };
   }
 
   save(search: Search): Promise<Search> {
