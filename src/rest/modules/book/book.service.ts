@@ -218,21 +218,11 @@ export class BookService {
       const currentShelf = existingShelves[0];
       const newShelf = userShelves.find((shelf) => shelf.type === statusType);
 
-      if (currentShelf && (!newShelf || currentShelf.id !== newShelf.id)) {
+      if (currentShelf) {
         const currentShelfBooks = await currentShelf.books;
         currentShelf.books = Promise.resolve(currentShelfBooks.filter((b) => b.id !== book.id));
         currentShelf.updatedAt = new Date();
         await this.shelfRepository.save(currentShelf);
-
-        const historyEntry = new History(
-          new Date(),
-          currentShelf ? HistoryStatus[currentShelf.type as keyof typeof HistoryStatus] : null,
-          newShelf ? HistoryStatus[newShelf.type as keyof typeof HistoryStatus] : null,
-          user,
-          book,
-        );
-
-        await this.historyRepository.save(historyEntry);
       }
 
       if (newShelf) {
@@ -243,21 +233,17 @@ export class BookService {
           newShelf.updatedAt = new Date();
           await this.shelfRepository.save(newShelf);
         }
-
-        const historyEntry = new History(
-          new Date(),
-          currentShelf ? HistoryStatus[currentShelf.type as keyof typeof HistoryStatus] : null,
-          HistoryStatus[newShelf.type as keyof typeof HistoryStatus],
-          user,
-          book,
-        );
-
-        await this.historyRepository.save(historyEntry);
-
-        return newShelf.type;
       }
 
-      return undefined;
+      const historyEntry = new History(
+        new Date(),
+        currentShelf ? HistoryStatus[currentShelf.type as keyof typeof HistoryStatus] : null,
+        newShelf ? HistoryStatus[newShelf.type as keyof typeof HistoryStatus] : null,
+        user,
+        book,
+      );
+      await this.historyRepository.save(historyEntry);
+      return statusType;
     });
   }
 
