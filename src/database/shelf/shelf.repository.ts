@@ -63,7 +63,12 @@ export class ShelfRepository {
   findById(id: number): Promise<Shelf | null> {
     return this.repository.findOne({
       where: { id },
-      relations: { user: true },
+      relations: {
+        user: true,
+        books: {
+          authors: true,
+        },
+      },
     });
   }
 

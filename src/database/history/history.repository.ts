@@ -20,7 +20,11 @@ export class HistoryRepository {
         order: { createdAt: 'DESC' },
         skip: offset,
         take: limit,
-        relations: { book: true },
+        relations: {
+          book: {
+            authors: true,
+          },
+        },
       }),
       this.repository.count({
         where: { user: { id: userId } },

@@ -31,6 +31,7 @@ export class BookRepository {
       .createQueryBuilder('book')
       .innerJoin('book.shelves', 'shelf')
       .where('shelf.id = :shelfId', { shelfId: shelf.id })
+      .leftJoinAndSelect('book.authors', 'book_authors')
       .orderBy('book.id', 'DESC')
       .limit(3)
       .getMany();
@@ -44,14 +45,16 @@ export class BookRepository {
   }
 
   findByIsbn10(isbn10: string): Promise<Book | null> {
-    return this.repository.findOneBy({
-      isbn10,
+    return this.repository.findOne({
+      where: { isbn10 },
+      relations: { authors: true },
     });
   }
 
   findByIsbn13(isbn13: string): Promise<Book | null> {
-    return this.repository.findOneBy({
-      isbn13,
+    return this.repository.findOne({
+      where: { isbn13 },
+      relations: { authors: true },
     });
   }
 

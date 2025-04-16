@@ -25,6 +25,7 @@ export class SearchRepository {
       .createQueryBuilder('s')
       .innerJoin('(' + SEARCH_QUERY + ')', 'similarity_data', 'similarity_data.search_id = s.id')
       .leftJoinAndSelect('s.book', 'book')
+      .leftJoinAndSelect('book.authors', 'book_authors')
       .leftJoinAndSelect('s.author', 'author')
       .setParameters(queryParameters)
       .orderBy('similarity', 'DESC')

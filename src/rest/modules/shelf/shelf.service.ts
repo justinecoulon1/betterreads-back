@@ -1,7 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ShelfRepository } from '../../../database/shelf/shelf.repository';
 import { Shelf, ShelfType } from '../../../database/model/shelf.entity';
-import { UserRepository } from '../../../database/user/user.repository';
 import { ShelfNotFoundException } from './shelf.exceptions';
 import { TransactionService } from '../../../database/utils/transaction/transaction.service';
 import { BookRepository } from '../../../database/book/book.repository';
@@ -11,23 +10,20 @@ import { User } from '../../../database/model/user.entity';
 export class ShelfService {
   constructor(
     private readonly shelfRepository: ShelfRepository,
-    private readonly userRepository: UserRepository,
     private readonly bookRepository: BookRepository,
     private readonly transactionService: TransactionService,
   ) {}
 
   async getUserShelves(userId: number, amount?: number): Promise<Shelf[]> {
-    return this.transactionService.wrapInTransaction(async () => {
-      const shelves = amount
-        ? await this.shelfRepository.findLatestShelvesByUserId(userId, amount)
-        : await this.shelfRepository.findShelvesByUserId(userId);
-      return await Promise.all(
-        shelves.map((shelf) => {
-          shelf.books = this.bookRepository.findLastBooksOfShelf(shelf);
-          return shelf;
-        }),
-      );
-    });
+    const shelves = amount
+      ? await this.shelfRepository.findLatestShelvesByUserId(userId, amount)
+      : await this.shelfRepository.findShelvesByUserId(userId);
+    return await Promise.all(
+      shelves.map((shelf) => {
+        shelf.books = this.bookRepository.findLastBooksOfShelf(shelf);
+        return shelf;
+      }),
+    );
   }
 
   async getUserShelvesContainingBook(userId: number, bookId: number): Promise<Shelf[]> {
@@ -35,22 +31,20 @@ export class ShelfService {
   }
 
   async getUserReadingStatusShelves(userId: number): Promise<Shelf[]> {
-    return this.transactionService.wrapInTransaction(async () => {
-      const shelves = await this.shelfRepository.findByUserIdAndTypeIn(userId, [
-        ShelfType.READING,
-        ShelfType.READ,
-        ShelfType.TO_READ,
-      ]);
-      if (shelves.length === 0) {
-        throw new ShelfNotFoundException();
-      }
-      return await Promise.all(
-        shelves.map((shelf) => {
-          shelf.books = this.bookRepository.findLastBooksOfShelf(shelf);
-          return shelf;
-        }),
-      );
-    });
+    const shelves = await this.shelfRepository.findByUserIdAndTypeIn(userId, [
+      ShelfType.READING,
+      ShelfType.READ,
+      ShelfType.TO_READ,
+    ]);
+    if (shelves.length === 0) {
+      throw new ShelfNotFoundException();
+    }
+    return await Promise.all(
+      shelves.map((shelf) => {
+        shelf.books = this.bookRepository.findLastBooksOfShelf(shelf);
+        return shelf;
+      }),
+    );
   }
 
   getAllShelves(): Promise<Shelf[]> {
