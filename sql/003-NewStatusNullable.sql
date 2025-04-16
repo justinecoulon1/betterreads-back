@@ -1,0 +1,2 @@
+ALTER TABLE history
+    ALTER COLUMN new_status DROP NOT NULL;
