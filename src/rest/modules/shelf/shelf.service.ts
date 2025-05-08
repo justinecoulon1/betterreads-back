@@ -86,4 +86,19 @@ export class ShelfService {
 
     return this.shelfRepository.remove(shelf);
   }
+
+  async updateShelfName(userId: number, shelfId: number, updatedShelfName: string): Promise<Shelf> {
+    const shelf = await this.shelfRepository.findById(shelfId);
+    if (!shelf) {
+      throw new ShelfNotFoundException();
+    }
+    const shelfUserId = (await shelf.user).id;
+    if (userId !== shelfUserId) {
+      throw new ForbiddenException();
+    }
+
+    shelf.name = updatedShelfName;
+
+    return this.shelfRepository.save(shelf);
+  }
 }

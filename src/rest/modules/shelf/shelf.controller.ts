@@ -1,7 +1,13 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
 import { ShelfService } from './shelf.service';
 import shelfMapper from '../../mapper/shelf.mapper';
-import { CreateShelfRequestDto, ShelfDto, ShelfWithLastBookDto, SmallShelfDto } from '../../dto/shelf.dto';
+import {
+  CreateShelfRequestDto,
+  ShelfDto,
+  ShelfWithLastBookDto,
+  SmallShelfDto,
+  UpdateShelfNameRequestDto,
+} from '../../dto/shelf.dto';
 import { ShelfType } from '../../../database/model/shelf.entity';
 import { Role } from '../../utils/roles/roles.decorator';
 import { BetterreadsRequest } from '../../utils/http/betterreads-request';
@@ -72,5 +78,17 @@ export class ShelfController {
     @Param('shelfId', ParseIntPipe) shelfId: number,
   ): Promise<SmallShelfDto> {
     return shelfMapper.toSmallDto(await this.shelfService.removeShelf(req.user.id, shelfId));
+  }
+
+  @Role('user')
+  @Post('/update-name/:shelfId')
+  async updateShelfName(
+    @Req() req: BetterreadsRequest,
+    @Param('shelfId', ParseIntPipe) shelfId: number,
+    @Body() updateShelfNameRequestDto: UpdateShelfNameRequestDto,
+  ): Promise<ShelfDto> {
+    return shelfMapper.toDto(
+      await this.shelfService.updateShelfName(req.user.id, shelfId, updateShelfNameRequestDto.name),
+    );
   }
 }
