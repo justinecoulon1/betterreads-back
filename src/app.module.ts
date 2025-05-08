@@ -10,6 +10,7 @@ import { AuthModule } from './rest/utils/auth/auth.module';
 import { RolesGuard } from './rest/utils/roles/roles.guard';
 import { SearchModule } from './rest/modules/search/search.module';
 import { HistoryModule } from './rest/modules/history/history.module';
+import { ReviewModule } from './rest/modules/review/review.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { HistoryModule } from './rest/modules/history/history.module';
     AuthModule,
     SearchModule,
     HistoryModule,
+    ReviewModule,
   ],
   controllers: [],
   providers: [

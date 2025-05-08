@@ -35,6 +35,8 @@ export class Review {
     this.score = score;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
-    this.user = Promise.resolve(user);
+    if (user) {
+      this.user = Promise.resolve(user);
+    }
   }
 }
