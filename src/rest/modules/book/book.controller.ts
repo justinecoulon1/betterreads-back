@@ -3,6 +3,7 @@ import { BookService } from './book.service';
 import bookMapper from '../../mapper/book.mapper';
 import {
   BookDto,
+  CompleteBookDto,
   CreateBookRequestDto,
   PreloadedBookInfoDto,
   SmallBookDto,
@@ -16,12 +17,15 @@ import { ShelfType } from '../../../database/model/shelf.entity';
 import { BetterreadsRequest } from '../../utils/http/betterreads-request';
 import { Role } from '../../utils/roles/roles.decorator';
 import shelfMapper from '../../mapper/shelf.mapper';
+import { ReviewService } from '../review/review.service';
+import reviewMapper from '../../mapper/review.mapper';
 
 @Controller('/books')
 export class BookController {
   constructor(
     private readonly bookService: BookService,
     private readonly isbnService: IsbnService,
+    private readonly reviewService: ReviewService,
   ) {}
 
   @Get('/latest')
@@ -35,9 +39,12 @@ export class BookController {
   }
 
   @Get('/isbn/:isbn')
-  async getBookByIsbn(@Param('isbn') rawIsbn: string): Promise<BookDto> {
+  async getBookByIsbn(@Param('isbn') rawIsbn: string): Promise<CompleteBookDto> {
     const isbn = this.isbnService.parseIsbn(rawIsbn);
-    return bookMapper.toBookDto(await this.bookService.getBookByIsbn(isbn));
+    const book = await bookMapper.toBookDto(await this.bookService.getBookByIsbn(isbn));
+    const lastReviews = await reviewMapper.toDtos(await this.reviewService.getLastAddedByBookId(book.id));
+    const averageScore = await this.reviewService.getBookAverageScore(book.id);
+    return { ...book, reviews: lastReviews, averageScore };
   }
 
   @Role('user')

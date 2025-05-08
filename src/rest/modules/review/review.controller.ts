@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { Role } from '../../utils/roles/roles.decorator';
 import { BetterreadsRequest } from '../../utils/http/betterreads-request';
@@ -9,9 +9,9 @@ import reviewMapper from '../../mapper/review.mapper';
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
-  @Get()
-  async getLastAdded(): Promise<ReviewDto[]> {
-    return reviewMapper.toDtos(await this.reviewService.getLastAdded());
+  @Get('/:bookId')
+  async getLastAdded(@Param('bookId', ParseIntPipe) bookId: number): Promise<ReviewDto[]> {
+    return reviewMapper.toDtos(await this.reviewService.getLastAddedByBookId(bookId));
   }
 
   @Role('user')
@@ -21,7 +21,12 @@ export class ReviewController {
     @Body() createReviewRequestDto: CreateReviewRequestDto,
   ): Promise<ReviewDto> {
     return reviewMapper.toDto(
-      await this.reviewService.createReview(req.user, createReviewRequestDto.score, createReviewRequestDto.commentary),
+      await this.reviewService.createReview(
+        req.user,
+        createReviewRequestDto.score,
+        createReviewRequestDto.commentary,
+        createReviewRequestDto.bookId,
+      ),
     );
   }
 }

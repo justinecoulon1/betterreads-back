@@ -10,4 +10,5 @@ export type ReviewDto = {
 export type CreateReviewRequestDto = {
   score: number;
   commentary: string;
+  bookId: number;
 };
