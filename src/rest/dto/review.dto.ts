@@ -7,6 +7,11 @@ export type ReviewDto = {
   commentary: string;
 };
 
+export type BookReviewInfoDto = {
+  averageScore: number;
+  lastAddedReviews: ReviewDto[];
+};
+
 export type CreateReviewRequestDto = {
   score: number;
   commentary: string;

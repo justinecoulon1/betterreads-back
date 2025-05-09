@@ -1,7 +1,6 @@
 import { AuthorDto } from './author.dto';
 import { ShelfType } from '../../database/model/shelf.entity';
 import { SmallShelfDto } from './shelf.dto';
-import { ReviewDto } from './review.dto';
 
 export type SmallBookDto = {
   id: number;
@@ -22,11 +21,6 @@ export type BookDto = {
   editor: string;
   editionLanguage: string;
   description?: string;
-};
-
-export type CompleteBookDto = BookDto & {
-  reviews: ReviewDto[];
-  averageScore: number;
 };
 
 export type CreateBookRequestDto = {
