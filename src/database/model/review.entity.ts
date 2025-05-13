@@ -18,7 +18,7 @@ export class Review {
   @Column()
   commentary: string;
 
-  @Column()
+  @Column('decimal', { precision: 5, scale: 2 })
   score: number;
 
   @CreateDateColumn({ name: 'created_at' })
