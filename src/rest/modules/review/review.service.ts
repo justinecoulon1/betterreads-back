@@ -32,4 +32,11 @@ export class ReviewService {
     }
     return await this.reviewRepository.getBookAverageScore(bookId);
   }
+
+  async getByUserId(userId: number, amount?: number) {
+    if (amount) {
+      return await this.reviewRepository.findLastByUserId(userId, amount);
+    }
+    return await this.reviewRepository.findByUserId(userId);
+  }
 }

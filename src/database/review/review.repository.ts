@@ -23,6 +23,26 @@ export class ReviewRepository {
     });
   }
 
+  findLastByUserId(userId: number, amount: number): Promise<Review[]> {
+    console.log(userId);
+    return this.repository.find({
+      where: {
+        user: { id: userId },
+      },
+      order: { createdAt: 'DESC' },
+      take: amount,
+    });
+  }
+
+  findByUserId(userId: number): Promise<Review[]> {
+    return this.repository.find({
+      where: {
+        user: { id: userId },
+      },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async getBookAverageScore(bookId: number): Promise<number> {
     const result = await this.repository
       .createQueryBuilder('review')

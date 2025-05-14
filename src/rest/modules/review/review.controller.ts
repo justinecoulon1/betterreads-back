@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/c
 import { ReviewService } from './review.service';
 import { Role } from '../../utils/roles/roles.decorator';
 import { BetterreadsRequest } from '../../utils/http/betterreads-request';
-import { BookReviewInfoDto, CreateReviewRequestDto, ReviewDto } from '../../dto/review.dto';
+import { BookReviewInfoDto, CreateReviewRequestDto, ReviewDto, UserReviewDto } from '../../dto/review.dto';
 import reviewMapper from '../../mapper/review.mapper';
 
 @Controller('/reviews')
@@ -12,6 +12,11 @@ export class ReviewController {
   @Get('last-added/:bookId')
   async getLastAdded(@Param('bookId', ParseIntPipe) bookId: number): Promise<ReviewDto[]> {
     return reviewMapper.toDtos(await this.reviewService.getLastAddedByBookId(bookId));
+  }
+
+  @Get('/last')
+  async getLastByUserId(@Req() req: BetterreadsRequest): Promise<UserReviewDto[]> {
+    return reviewMapper.toUserDtos(await this.reviewService.getByUserId(req.user.id, 5));
   }
 
   @Get('/:bookId')
