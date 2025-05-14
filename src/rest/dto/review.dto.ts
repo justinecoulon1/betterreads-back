@@ -12,6 +12,11 @@ export type UserReviewDto = ReviewDto & {
   book: SmallBookDto;
 };
 
+export type PaginatedReviewDto = {
+  reviews: UserReviewDto[];
+  totalCount: number;
+};
+
 export type BookReviewInfoDto = {
   averageScore: number;
   lastAddedReviews: ReviewDto[];

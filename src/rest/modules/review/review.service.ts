@@ -4,6 +4,7 @@ import { User } from '../../../database/model/user.entity';
 import { Review } from '../../../database/model/review.entity';
 import { BookRepository } from '../../../database/book/book.repository';
 import { BookNotFoundException } from '../book/book.exceptions';
+import { PaginatedReviews } from './review.types';
 
 @Injectable()
 export class ReviewService {
@@ -38,5 +39,10 @@ export class ReviewService {
       return await this.reviewRepository.findLastByUserId(userId, amount);
     }
     return await this.reviewRepository.findByUserId(userId);
+  }
+
+  async getPaginatedUserReviews(userId: number, limit: number, offset: number): Promise<PaginatedReviews> {
+    const review = await this.reviewRepository.findReviewsByUserId(userId, limit, offset);
+    return { reviews: review.reviews, totalCount: review.totalCount };
   }
 }

@@ -1,8 +1,14 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, Req } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { Role } from '../../utils/roles/roles.decorator';
 import { BetterreadsRequest } from '../../utils/http/betterreads-request';
-import { BookReviewInfoDto, CreateReviewRequestDto, ReviewDto, UserReviewDto } from '../../dto/review.dto';
+import {
+  BookReviewInfoDto,
+  CreateReviewRequestDto,
+  PaginatedReviewDto,
+  ReviewDto,
+  UserReviewDto,
+} from '../../dto/review.dto';
 import reviewMapper from '../../mapper/review.mapper';
 
 @Controller('/reviews')
@@ -40,5 +46,16 @@ export class ReviewController {
         createReviewRequestDto.bookId,
       ),
     );
+  }
+
+  @Role('user')
+  @Get()
+  async getUserReviews(
+    @Req() req: BetterreadsRequest,
+    @Query('limit', ParseIntPipe) limit: number,
+    @Query('offset', ParseIntPipe) offset: number,
+  ): Promise<PaginatedReviewDto> {
+    const result = await this.reviewService.getPaginatedUserReviews(req.user.id, limit, offset);
+    return { reviews: await reviewMapper.toUserDtos(result.reviews), totalCount: result.totalCount };
   }
 }

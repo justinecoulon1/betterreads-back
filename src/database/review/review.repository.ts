@@ -24,7 +24,6 @@ export class ReviewRepository {
   }
 
   findLastByUserId(userId: number, amount: number): Promise<Review[]> {
-    console.log(userId);
     return this.repository.find({
       where: {
         user: { id: userId },
@@ -32,6 +31,30 @@ export class ReviewRepository {
       order: { createdAt: 'DESC' },
       take: amount,
     });
+  }
+
+  async findReviewsByUserId(userId: number, limit: number, offset: number) {
+    const [reviews, totalCount] = await Promise.all([
+      this.repository.find({
+        where: { user: { id: userId } },
+        order: { createdAt: 'DESC' },
+        skip: offset,
+        take: limit,
+        relations: {
+          book: {
+            authors: true,
+          },
+        },
+      }),
+      this.repository.count({
+        where: { user: { id: userId } },
+      }),
+    ]);
+
+    return {
+      reviews,
+      totalCount,
+    };
   }
 
   findByUserId(userId: number): Promise<Review[]> {
